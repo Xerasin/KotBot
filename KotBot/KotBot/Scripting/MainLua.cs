@@ -64,6 +64,14 @@ namespace KotBot.Scripting
             IncludeFolder("autorun");
         }
 
+        [RegisterLuaFunction("bot.reload")]
+        public static void ReloadBot()
+        {
+            LuaTimer.timers = new Dictionary<object, LuaTimer>();
+            LuaHook.hooks = new Dictionary<string, Dictionary<string, LuaFunction>>();
+            PreLoad();
+            LoadAll();
+        }
         /*[RegisterLuaFunction("RealTime")]
         public static float Time()
         {
@@ -85,7 +93,8 @@ namespace KotBot.Scripting
             DoString(reader.ReadToEnd());
         }
 
-        private static void IncludeFolder(string folder)
+        [RegisterLuaFunction("runfolder")]
+        public static void IncludeFolder(string folder)
         {
             try
             {
@@ -156,8 +165,8 @@ namespace KotBot.Scripting
         {
 
         }
-
-        public static void DoString(string code, params object[] t)
+        [RegisterLuaFunction("dolua")]
+        public static string DoString(string code, params object[] t)
         {
             Dictionary<string, object> stuff = new Dictionary<string, object>();
             if (t.Length % 2 == 0)
@@ -171,7 +180,7 @@ namespace KotBot.Scripting
                         stuff[(string)key] = value;
                     }
                 }
-                DoString(code, stuff);
+                return DoString(code, stuff);
             }
             else
             {
@@ -179,17 +188,24 @@ namespace KotBot.Scripting
             }
         }
 
-        public static void DoString(string code, Dictionary<string, object> locals)
+        public static string DoString(string code, Dictionary<string, object> locals)
         {
             string header = "";
             Dictionary<string, object> newLocals = MergeTab(PermaLocals, locals);
             foreach (KeyValuePair<string, object> local in newLocals)
             {
-                //LuaInstance[local.Key] = local.Value;
+                LuaInstance[local.Key] = local.Value;
                 header += "local " + local.Key + " = " + local.Key + " ";
             }
-
-            LuaInstance.DoString(header + "\n" + code);
+            try
+            {
+                LuaInstance.DoString(header + "\n" + code);
+                return null;
+            }
+            catch(LuaException e)
+            {
+                return e.Message;
+            }
 
             /*foreach (KeyValuePair<string, object> local in newLocals)
             {
