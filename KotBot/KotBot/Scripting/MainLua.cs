@@ -60,7 +60,7 @@ namespace KotBot.Scripting
         }
         public static void LoadAll()
         {
-            //IncludeFolder("modules");
+            IncludeFolder("modules");
             IncludeFolder("autorun");
         }
 
