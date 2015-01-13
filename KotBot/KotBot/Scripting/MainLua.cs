@@ -57,6 +57,7 @@ namespace KotBot.Scripting
             registerAttributesFromClass(typeof(MainLua));
             registerAttributesFromClass(typeof(IRCBot));
             registerAttributesFromClass(typeof(Log));
+            registerAttributesFromClass(typeof(LuaWebClient));
         }
         public static void LoadAll()
         {

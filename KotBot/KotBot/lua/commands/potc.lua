@@ -1,4 +1,6 @@
 Commands.Register("potcfdk", function(message, words) 
-	bot.reload()
 	message:Reply("Go fuck yourself")
+end, "Uh", "o")
+Commands.Register("katie", function(message, words) 
+	message:Reply("She brings the sex in sexy") 
 end, "Uh", "o")

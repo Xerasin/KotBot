@@ -18,7 +18,7 @@ namespace KotBot
             info.RealName = "KotBot";
             info.UserName = "KotBot";
             var client = new IrcClient();
-            client.FloodPreventer = new IrcStandardFloodPreventer(4, 2000);
+            client.FloodPreventer = new IrcStandardFloodPreventer(100, 2000);
             client.Connected += client_Connected;
             client.Disconnected += client_Disconnected;
             client.Registered += client_Registered;

@@ -33,6 +33,8 @@ namespace KotBot
         }
         public static void Print(LogType type, params object[] stuff)
         {
+            if (stuff == null)
+                return;
             Console.ForegroundColor = GetColor(type);
             for (int I = 0; I < stuff.Length; I++)
             {

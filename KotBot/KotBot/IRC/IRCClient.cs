@@ -17,6 +17,10 @@ namespace KotBot.IRC
         }
         public override void Message(string message)
         {
+            if (message.Length > 500)
+            {
+                message = message.Substring(0, 500);
+            }
             client.SendMessage(channel, message);
         }
     }

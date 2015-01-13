@@ -1,6 +1,6 @@
 Commands.Register("!help", function(message, words) 
 	if #words > 0 then
-		local tbl = Commands.Commands[words[1]]
+		local tbl = Commands.Get(words[1])
 		if tbl then
 			message:GetSender():Message(words[1] .. ": " .. tbl.help)
 		end
