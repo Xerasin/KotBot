@@ -15,7 +15,7 @@ namespace KotBot
         {
             IrcDotNet.IrcUserRegistrationInfo info = new IrcUserRegistrationInfo();
             info.NickName = "KotBot";
-            info.RealName = "KotBot";
+            info.RealName = "Katie Bot";
             info.UserName = "KotBot";
             var client = new IrcClient();
             client.FloodPreventer = new IrcStandardFloodPreventer(100, 2000);

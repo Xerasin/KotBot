@@ -1,0 +1,5 @@
+Commands.Register("!about", function(message, words, text) 
+	message:Reply("Why do you want to know that? Oh well...")
+	message:Reply("I'm KotBot, some call me Knotbot but that makes me sad :<, I am a bot written by Xerasin shes a great lady <3")
+end, "Get my about information", "")
+Commands.Alias("!about", "!info")

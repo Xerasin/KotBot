@@ -1,4 +1,5 @@
 Commands.Register("!gelbooru", function(message, words, text) 
+	message:Reply("Okay you naughty person ;), I'll get right on that for you <3~")
 	local client = Webclient.Create()
 	local tags = ""
 	if #words > 0 then
@@ -12,6 +13,6 @@ Commands.Register("!gelbooru", function(message, words, text)
 		local tags = str:match("tags=\"([^\"]+)\"")
 		message:Reply("Random gelbooru! url = http://gelbooru.com/index.php?page=post&s=view&id=" .. id .. " tags = " .. tags)
 	end
-end, "HENTAAAAAAAAAAAAAI", "o")
+end, "HENTAAAAAAAAAAAAAI", "")
 Commands.Alias("!gelbooru", "!hentai")
 Commands.Alias("!gelbooru", "!porn")

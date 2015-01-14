@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -42,8 +43,10 @@ namespace KotBot.Scripting
             {
                 t[key.Key] = key.Value;
             }
+            ArrayList returns = new ArrayList();
             foreach (KeyValuePair<string, LuaFunction> key in t)
             {
+               
                 if (key.Value == null)
                 {
                     Log.Error("Hook '" + key.Key + "' called a null function");
@@ -55,7 +58,7 @@ namespace KotBot.Scripting
                     try
                     {
                         object[] lua_return =  key.Value.Call(lua_params);
-                        return lua_return;
+                        returns.Add(lua_return);
                     }
                     catch (LuaException e)
                     {
@@ -64,8 +67,9 @@ namespace KotBot.Scripting
                         continue;
                     }
                 }
+                
             }
-            return null;
+            return returns.ToArray();
         }
     }
 }

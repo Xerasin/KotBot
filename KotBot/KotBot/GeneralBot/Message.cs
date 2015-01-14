@@ -21,6 +21,10 @@ namespace KotBot
         {
             this.client.Message(message);
         }
+        public virtual Client GetClient()
+        {
+            return this.client;
+        }
         public virtual string GetMessage()
         {
             return this.message;

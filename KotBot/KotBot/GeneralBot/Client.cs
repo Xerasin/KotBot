@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KotBot
 {
-    public class User
+    public class Client
     {
         public virtual void Message(string message)
         {
@@ -15,6 +15,10 @@ namespace KotBot
         public virtual string GetName()
         {
             return "";
+        }
+        public virtual User FindUserByName(string name)
+        {
+            return null;
         }
     }
 }

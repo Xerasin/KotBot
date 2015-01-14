@@ -25,5 +25,9 @@ namespace KotBot.IRC
         {
             localuser.SendMessage(user, message);
         }
+        public override string GetUserID()
+        {
+            return localuser.Client.ServerName + "|IRC|" + user.NickName;
+        }
     }
 }

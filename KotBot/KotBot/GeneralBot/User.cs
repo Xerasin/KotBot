@@ -6,11 +6,19 @@ using System.Threading.Tasks;
 
 namespace KotBot
 {
-    public class Client
+    public class User
     {
         public virtual void Message(string message)
         {
 
+        }
+        public virtual string GetName()
+        {
+            return "";
+        }
+        public virtual string GetUserID()
+        {
+            return "";
         }
     }
 }

@@ -12,7 +12,7 @@ namespace KotBot
         static void Main(string[] args)
         {
             Scripting.MainLua.PreLoad();
-            Scripting.MainLua.LoadAll();
+            Scripting.MainLua.LoadAll(true);
             while(true)
             {
                 Scripting.LuaHook.Call("Think");

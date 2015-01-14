@@ -59,10 +59,12 @@ namespace KotBot.Scripting
             registerAttributesFromClass(typeof(Log));
             registerAttributesFromClass(typeof(LuaWebClient));
         }
-        public static void LoadAll()
+        public static void LoadAll(bool firstload)
         {
             IncludeFolder("modules");
             IncludeFolder("autorun");
+            if (firstload)
+                IncludeFolder("autorun/firstrun");
         }
 
         [RegisterLuaFunction("bot.reload")]
@@ -71,7 +73,7 @@ namespace KotBot.Scripting
             LuaTimer.timers = new Dictionary<object, LuaTimer>();
             LuaHook.hooks = new Dictionary<string, Dictionary<string, LuaFunction>>();
             PreLoad();
-            LoadAll();
+            LoadAll(false);
         }
         /*[RegisterLuaFunction("RealTime")]
         public static float Time()
@@ -91,7 +93,8 @@ namespace KotBot.Scripting
             string assembly = _assembly.GetName().FullName;
             Stream stream = _assembly.GetManifestResourceStream("Treg_Engine"+"."+lua);
             StreamReader reader = new StreamReader(stream);
-            DoString(reader.ReadToEnd());
+            object test;
+            DoString(reader.ReadToEnd(), out test);
         }
 
         [RegisterLuaFunction("runfolder")]
@@ -167,7 +170,7 @@ namespace KotBot.Scripting
 
         }
         [RegisterLuaFunction("dolua")]
-        public static string DoString(string code, params object[] t)
+        public static object DoString(string code, out object returns, params object[] t)
         {
             Dictionary<string, object> stuff = new Dictionary<string, object>();
             if (t.Length % 2 == 0)
@@ -181,7 +184,7 @@ namespace KotBot.Scripting
                         stuff[(string)key] = value;
                     }
                 }
-                return DoString(code, stuff);
+                return DoString(code, stuff, out returns);
             }
             else
             {
@@ -189,7 +192,7 @@ namespace KotBot.Scripting
             }
         }
 
-        public static string DoString(string code, Dictionary<string, object> locals)
+        public static object DoString(string code, Dictionary<string, object> locals, out object returns)
         {
             string header = "";
             Dictionary<string, object> newLocals = MergeTab(PermaLocals, locals);
@@ -200,12 +203,22 @@ namespace KotBot.Scripting
             }
             try
             {
-                LuaInstance.DoString(header + "\n" + code);
-                return null;
+                object[] test = LuaInstance.DoString(header + "\n" + code);
+                if (test != null && test.Length > 0)
+                {
+                    returns = test[0];
+                }
+                else
+                {
+                    returns = null;
+                }
+                
+                return true;
             }
             catch(LuaException e)
             {
-                return e.Message;
+                returns = e.Message;
+                return false;
             }
 
             /*foreach (KeyValuePair<string, object> local in newLocals)
