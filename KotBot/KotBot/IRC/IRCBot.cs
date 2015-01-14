@@ -22,7 +22,7 @@ namespace KotBot
             client.Connected += client_Connected;
             client.Disconnected += client_Disconnected;
             client.Registered += client_Registered;
-
+           
             client.Connect(System.Net.IPAddress.Parse(IP), false, info);
 
             // Add new client to collection.

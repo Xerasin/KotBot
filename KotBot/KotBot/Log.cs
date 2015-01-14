@@ -36,6 +36,8 @@ namespace KotBot
             if (stuff == null)
                 return;
             Console.ForegroundColor = GetColor(type);
+            Console.Write(DateTime.Now.TimeOfDay.ToString() + " - ");
+            if (stream != null) stream.Write(DateTime.Now.TimeOfDay.ToString() + " - ");
             for (int I = 0; I < stuff.Length; I++)
             {
                 if (I != 0)
@@ -70,24 +72,19 @@ namespace KotBot
         public const string FileExt = ".txt";
         public static void StartLog()
         {
-            for (int I = 3; I >= 0; I--)
+            string date = String.Format("{0}-{1}-{2}", DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Year);
+            string id = "";
+            for (int I = 0; I <= 100; I++)
             {
-                string file = LogFile + (I == 0 ? "" : I.ToString()) + FileExt;
+                string file = LogFile + "." + date + "." + I.ToString() + FileExt;
 
-                if (File.Exists(file))
+                if (!File.Exists(file))
                 {
-                    if (I == 3)
-                    {
-                        File.Delete(file);
-                    }
-                    else
-                    {
-                        File.Move(file, LogFile + (I + 1) + FileExt);
-                    }
+                    id = file;
+                    break;
                 }
             }
-            string filename = LogFile + FileExt;
-            stream = new StreamWriter(filename);
+            stream = new StreamWriter(id);
             stream.AutoFlush = true;
         }
         public static void EndLog()

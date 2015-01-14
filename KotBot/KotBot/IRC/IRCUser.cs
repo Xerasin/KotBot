@@ -24,6 +24,7 @@ namespace KotBot.IRC
         public override void Message(string message)
         {
             localuser.SendMessage(user, message);
+            Scripting.LuaHook.Call("MessageSent", new Message(new IRCPMClient(localuser, user), new IRC.IRCUser(localuser, localuser), message));
         }
         public override string GetUserID()
         {

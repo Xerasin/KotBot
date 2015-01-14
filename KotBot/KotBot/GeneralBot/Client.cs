@@ -20,5 +20,9 @@ namespace KotBot
         {
             return null;
         }
+        public virtual string GetLocationString()
+        {
+            return "";
+        }
     }
 }

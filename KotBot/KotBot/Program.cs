@@ -11,6 +11,7 @@ namespace KotBot
     {
         static void Main(string[] args)
         {
+            Log.StartLog();
             Scripting.MainLua.PreLoad();
             Scripting.MainLua.LoadAll(true);
             while(true)

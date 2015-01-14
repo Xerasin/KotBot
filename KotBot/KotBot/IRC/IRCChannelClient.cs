@@ -22,6 +22,11 @@ namespace KotBot.IRC
                 message = message.Substring(0, 500);
             }
             client.SendMessage(channel, message);
+            Scripting.LuaHook.Call("MessageSent", new Message(this, new IRC.IRCUser(client, client), message));
+        }
+        public override string GetLocationString()
+        {
+            return client.Client.ServerName + "|" + channel.Name;
         }
         public void JoinChannel(string channel)
         {
