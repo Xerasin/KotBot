@@ -23,6 +23,14 @@ namespace KotBot.IRC
             }
             client.SendMessage(channel, message);
         }
+        public void JoinChannel(string channel)
+        {
+            client.Client.Channels.Join(channel);
+        }
+        public void LeaveChannel()
+        {
+            channel.Leave("I was told too... *cries* :(");
+        }
         public override string GetName()
         {
             return client.NickName;
