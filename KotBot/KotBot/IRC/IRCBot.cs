@@ -49,9 +49,15 @@ namespace KotBot
         }
         static void client_Registered(object sender, EventArgs e)
         {
+            ((IrcClient)sender).LocalUser.LeftChannel += LocalUser_LeftChannel;
             ((IrcClient)sender).LocalUser.JoinedChannel += IrcClient_LocalUser_JoinedChannel;
             ((IrcClient)sender).LocalUser.MessageReceived += LocalUser_MessageReceived;
             Scripting.LuaHook.Call("IRC.Registered", (IrcClient)sender);
+        }
+
+        static void LocalUser_LeftChannel(object sender, IrcChannelEventArgs e)
+        {
+            e.Channel.MessageReceived -= Channel_MessageReceived;
         }
 
         static void LocalUser_MessageReceived(object sender, IrcMessageEventArgs e)
