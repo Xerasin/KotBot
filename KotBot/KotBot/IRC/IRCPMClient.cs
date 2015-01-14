@@ -6,14 +6,14 @@ using System.Threading.Tasks;
 
 namespace KotBot.IRC
 {
-    public class IRCClient : Client
+    public class IRCPMClient : Client
     {
         private IrcDotNet.IrcLocalUser client;
-        private IrcDotNet.IrcChannel channel;
-        public IRCClient(IrcDotNet.IrcLocalUser client, IrcDotNet.IrcChannel channel)
+        private IrcDotNet.IrcUser user;
+        public IRCPMClient(IrcDotNet.IrcLocalUser client, IrcDotNet.IrcUser user)
         {
             this.client = client;
-            this.channel = channel;
+            this.user = user;
         }
         public override void Message(string message)
         {
@@ -21,7 +21,7 @@ namespace KotBot.IRC
             {
                 message = message.Substring(0, 500);
             }
-            client.SendMessage(channel, message);
+            client.SendMessage(user, message);
         }
         public override string GetName()
         {
@@ -29,13 +29,13 @@ namespace KotBot.IRC
         }
         public override User FindUserByName(string name)
         {
-            foreach(IrcDotNet.IrcChannelUser user in channel.Users)
+            foreach (IrcDotNet.IrcChannelUser user in client.GetChannelUsers())
             {
-                if(user.User.NickName.ToLower().Contains(name.ToLower()))
+                if (user.User.NickName.ToLower().Contains(name.ToLower()))
                 {
                     return new IRCUser(client, user.User);
                 }
-            }
+            }   
             return null;
         }
     }

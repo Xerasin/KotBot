@@ -76,7 +76,8 @@
   <ItemGroup>
     <Compile Include="GeneralBot\Client.cs" />
     <Compile Include="IRC\IRCBot.cs" />
-    <Compile Include="IRC\IRCClient.cs" />
+    <Compile Include="IRC\IRCChannelClient.cs" />
+    <Compile Include="IRC\IRCPMClient.cs" />
     <Compile Include="IRC\IRCUser.cs" />
     <Compile Include="Log.cs" />
     <Compile Include="GeneralBot\Message.cs" />

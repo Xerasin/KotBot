@@ -22,7 +22,7 @@ namespace KotBot
             client.Connected += client_Connected;
             client.Disconnected += client_Disconnected;
             client.Registered += client_Registered;
-            
+
             client.Connect(System.Net.IPAddress.Parse(IP), false, info);
 
             // Add new client to collection.
@@ -45,12 +45,20 @@ namespace KotBot
             IrcChannel channel = (IrcChannel)sender;
             IrcLocalUser user = channel.Client.LocalUser;
             IrcUser messageSender = (IrcUser)e.Source;
-            Scripting.LuaHook.Call("MessageRecieved", new Message(new IRC.IRCClient(user, channel), new IRC.IRCUser(user, messageSender), e.Text));
+            Scripting.LuaHook.Call("MessageRecieved", new Message(new IRC.IRCChannelClient(user, channel), new IRC.IRCUser(user, messageSender), e.Text));
         }
         static void client_Registered(object sender, EventArgs e)
         {
             ((IrcClient)sender).LocalUser.JoinedChannel += IrcClient_LocalUser_JoinedChannel;
+            ((IrcClient)sender).LocalUser.MessageReceived += LocalUser_MessageReceived;
             Scripting.LuaHook.Call("IRC.Registered", (IrcClient)sender);
+        }
+
+        static void LocalUser_MessageReceived(object sender, IrcMessageEventArgs e)
+        {
+            IrcLocalUser user = (IrcLocalUser)sender;
+            IrcUser messageSender = (IrcUser)e.Source;
+            Scripting.LuaHook.Call("MessageRecieved", new Message(new IRC.IRCPMClient(user, messageSender), new IRC.IRCUser(user, messageSender), e.Text));
         }
 
         static void client_Disconnected(object sender, EventArgs e)
