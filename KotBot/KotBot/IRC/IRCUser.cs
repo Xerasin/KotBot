@@ -23,6 +23,7 @@ namespace KotBot.IRC
 
         public override void Message(string message)
         {
+            message = message.Replace("\r\n", "");
             localuser.SendMessage(user, message);
             Scripting.LuaHook.Call("MessageSent", new Message(new IRCPMClient(localuser, user), new IRC.IRCUser(localuser, localuser), message));
         }

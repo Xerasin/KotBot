@@ -57,7 +57,9 @@ namespace KotBot.Scripting
             registerAttributesFromClass(typeof(MainLua));
             registerAttributesFromClass(typeof(IRCBot));
             registerAttributesFromClass(typeof(Log));
+            registerAttributesFromClass(typeof(LuaJSON));
             registerAttributesFromClass(typeof(LuaWebClient));
+            //registerAttributesFromClass(typeof(LuaAIML));
         }
         public static void LoadAll(bool firstload)
         {
@@ -80,7 +82,7 @@ namespace KotBot.Scripting
         {
             return Util.Time;
         }*/
-
+        //int last = 0;
         public static LuaTable GetNewTable()
         {
             LuaInstance.NewTable("t");
@@ -96,7 +98,25 @@ namespace KotBot.Scripting
             object test;
             DoString(reader.ReadToEnd(), out test);
         }
-
+        private static Random luaRandom = new Random();
+        [RegisterLuaFunction("math.randomseed")]
+        public static void RandomSeed(int random)
+        {
+            luaRandom = new Random(random);
+        }
+        [RegisterLuaFunction("math.random")]
+        public static double RandomSeed(int? start = null, int? end = null)
+        {
+            if(end == null)
+            {
+                if(start == null)
+                {
+                    return luaRandom.NextDouble();
+                }
+                return luaRandom.Next((int)start);
+            }
+            return luaRandom.Next((int)start, (int)end + 1);
+        }
         [RegisterLuaFunction("runfolder")]
         public static void IncludeFolder(string folder)
         {

@@ -19,6 +19,6 @@ Commands.Register("!lurl", function(message, words, text)
 			message:Reply(tostring(tbl[2]))
 		end
 	else
-		message:Reply("baka... this is a bad link... *pouts")
+		message:Reply("baka... this is a bad link... *pouts*")
 	end
 end, "Run lua from web", "l")

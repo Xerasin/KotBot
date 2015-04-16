@@ -17,6 +17,7 @@ namespace KotBot.IRC
         }
         public override void Message(string message)
         {
+            message = message.Replace("\r\n", "");
             if (message.Length > 500)
             {
                 message = message.Substring(0, 500);

@@ -5,6 +5,7 @@ local greetings = {
 	["hey"] = true,
 	["sup"] = true,
 	["greetings"] = true,
+	["yo$"] = true,
 }
 local notgreetings = {
 	["bye"] = true,
@@ -22,6 +23,7 @@ local function registerwords(msg, ...)
 	end
 	tbl.msg = msg 
 end
+
 for k,v in pairs(greetings) do
 	registerwords("Yay {user} noticed me! <3", "^" .. k, "^kot")
 	registerwords("Hey, {user}... don't call me that... *cries*", "^" .. k, "^knot")
@@ -35,10 +37,11 @@ registerwords("That was very mean, {user}. :( *runs crying*", "fuck", "you", "^k
 
 registerwords("Okay, I'll hide :(", "^kot", "hide")
 --registerwords("Thanks {user}... *stops crying whipes her eyes*", "I'm", "sorry", "^kot")
-registerwords("Thanks {user}... *stops crying whipes her eyes*", "sorry", "^kot")
+registerwords("Thanks {user}... *stops crying and whipes her eyes*", "sorry", "^kot")
 
 --registerwords("Apology not accepted {user}... *pouts*", "I'm", "sorry", "^knot")
 registerwords("Apology not accepted {user}... *pouts*", "sorry", "^knot")
+
 hook.Add("MessageRecieved", "MessageRecieved.wordpatterns", function(message)
 	local name = message:GetSender():GetName()
 	local text = message:GetMessage():lower()

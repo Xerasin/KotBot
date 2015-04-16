@@ -15,8 +15,15 @@ namespace KotBot.IRC
             this.client = client;
             this.channel = channel;
         }
+
+        public IrcDotNet.IrcChannel GetChannel()
+        {
+            return channel;
+        }
+
         public override void Message(string message)
         {
+            message = message.Replace("\r\n", "");
             if (message.Length > 500)
             {
                 message = message.Substring(0, 500);

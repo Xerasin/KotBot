@@ -51,10 +51,12 @@ namespace KotBot
             Console.Write("\n");
             if (stream != null) stream.Write("\r\n");
         }
+        [RegisterLuaFunction("debug")]
         public static void Debug(params object[] stuff)
         {
             Print(LogType.Debug, stuff);
         }
+        [RegisterLuaFunction("error")]
         public static void Error(params object[] stuff)
         {
             Print(LogType.Error, stuff);
@@ -64,19 +66,25 @@ namespace KotBot
         {
             Print(LogType.Normal, stuff);
         }
+        [RegisterLuaFunction("warning")]
         public static void Warning(params object[] stuff)
         {
             Print(LogType.Warning, stuff);
         }
+        public const string LogFolder = "logs";
         public const string LogFile = "log";
         public const string FileExt = ".txt";
         public static void StartLog()
         {
+            if (!Directory.Exists(LogFolder))
+            {
+                Directory.CreateDirectory(LogFolder);
+            }
             string date = String.Format("{0}-{1}-{2}", DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Year);
             string id = "";
             for (int I = 0; I <= 100; I++)
             {
-                string file = LogFile + "." + date + "." + I.ToString() + FileExt;
+                string file = LogFolder + "/" + LogFile + "." + date + "." + I.ToString() + FileExt;
 
                 if (!File.Exists(file))
                 {

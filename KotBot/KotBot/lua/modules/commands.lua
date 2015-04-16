@@ -30,7 +30,7 @@ hook.Add("MessageRecieved", "MessageRecieved.commands", function(message)
 	if #words > 0 then
 		local tbl = Commands.Get(words[1])
 		if tbl and Commands.HasPermissions(message:GetSender(), tbl.perm) then
-			local text2 = text:sub(#words[1] + 1)
+			local text2 = text:sub(#words[1] + 2)
 			table.remove(words, 1)
 			local status, error = pcall(tbl.func, message, words, text2)
 			if not status then
@@ -44,13 +44,7 @@ function Commands.RefreshPermissions()
 	Commands.Permissions = {}
 	local t = io.open("permissions.inf", "r")
 	if t then
-		for line in t:lines() do
-			local name, perms = line:match("^(.+);(.+)$")
-			Commands.Permissions[name] = {}
-			for I=1, #perms do
-				Commands.Permissions[name][perms:sub(I,I)] = true
-			end
-		end
+		Commands.Permissions = json.parse(t:read("*a"))
 		io.close(t)
 	end
 end
@@ -58,13 +52,7 @@ Commands.RefreshPermissions()
 function Commands.SavePermissions()
 	local t = io.open("permissions.inf", "w")
 	if t then
-		for name, perms in pairs(Commands.Permissions) do
-			local perms2 = ""
-			for k,v in pairs(perms) do
-				perms2 = perms2 .. k
-			end
-			t:write(name .. ";" .. perms2 .. "\n")
-		end
+		t:write(json.tostring(Commands.Permissions))
 		io.close(t)
 	end
 end
@@ -128,4 +116,5 @@ end
 function Commands.ClearPerms(user)
 	local user = user:GetUserID()
 	Commands.Permissions[user] = nil
+	Commands.SavePermissions()
 end
