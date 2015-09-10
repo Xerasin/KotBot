@@ -12,6 +12,10 @@ namespace KotBot
         {
 
         }
+        public virtual string GetIP()
+        {
+            return "";
+        }
         public virtual string GetName()
         {
             return "";

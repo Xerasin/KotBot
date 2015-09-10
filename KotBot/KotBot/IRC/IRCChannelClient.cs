@@ -47,6 +47,10 @@ namespace KotBot.IRC
         {
             return client.NickName;
         }
+        public override string GetIP()
+        {
+            return IRCBot.GetIP(client.Client);
+        }
         public override User FindUserByName(string name)
         {
             foreach(IrcDotNet.IrcChannelUser user in channel.Users)

@@ -4,6 +4,7 @@ hook.Add("MessageRecieved", "MessageRecieved.log", function(message)
 	local location = message:GetClient():GetLocationString()
 	print(location .. "| " .. name .. ": " .. text)
 end)
+
 hook.Add("MessageSent", "MessageRecieved.log", function(message)
 	local name = message:GetSender():GetName()
 	local text = message:GetMessage()
