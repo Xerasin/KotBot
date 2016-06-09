@@ -17,9 +17,10 @@ namespace KotBot.Scripting
             return client;
         }
         [RegisterLuaFunction("Webclient.FetchAsync")]
-        public static void Fetch(string url, NLua.LuaFunction func, NLua.LuaFunction errorfunc = null)
+        public static void Fetch(string url, NLua.LuaFunction func, NLua.LuaFunction errorfunc = null, string cookies = "")
         {
             WebClient client = Create();
+            client.Headers.Add(HttpRequestHeader.Cookie, cookies);
             client.DownloadStringCompleted += (sender, data) =>
             {
                 if (!data.Cancelled && data.Error == null)
@@ -54,7 +55,12 @@ namespace KotBot.Scripting
         [RegisterLuaFunction("Webclient.Encode")]
         public static string Encode(string data)
         {
-            return HttpUtility.HtmlEncode(data);
+            return HttpUtility.UrlEncode(data);
+        }
+        [RegisterLuaFunction("Webclient.Decode")]
+        public static string Decode(string data)
+        {
+            return HttpUtility.UrlDecode(data);
         }
     }
 }

@@ -1,25 +1,26 @@
 Commands.Register("!gelbooru", function(message, words, text) 
 	message:Reply("Okay you naughty person ;), I'll get right on that for you <3~")
-	local client = Webclient.Create()
 	local tags = ""
 	if #words > 0 then
 		tags = Webclient.Encode(text)
 	end
-	local str = client:DownloadString("http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags="..tags.. "&limit=1")
-	local count = tonumber(str:match("count=\"([%d]+)"))
-	if count > 0 then
-		local picked = math.random(0, count - 1)
-		local str = client:DownloadString("http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags="..tags.. "&limit=1&pid=" .. picked)
-		local id = tonumber(str:match("id=\"([%d]+)"))
-		local tags2 = str:match("tags=\"([^\"]+)\"")
-		if not id or id == "" then
-			message:Reply("No gelbooru image found! (Error?)")
+	Webclient.FetchAsync("http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags="..tags.. "&limit=1", function(str)
+		local count = tonumber(str:match("count=\"([%d]+)"))
+		if count > 0 then
+			local picked = math.random(0, count - 1)
+			local str = Webclient.FetchAsync("http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags="..tags.. "&limit=1&pid=" .. picked, function(str)
+				local id = tonumber(str:match("id=\"([%d]+)"))
+				local tags2 = str:match("tags=\"([^\"]+)\"")
+				if not id or id == "" then
+					message:Reply("No gelbooru image found! (Error?)")
+				else
+					message:Reply("Random gelbooru! (".. (picked + 1) .."/".. count .." | "..text..") url = http://gelbooru.com/index.php?page=post&s=view&id=" .. id .. " tags = " .. tags2)
+				end
+			end, "user_id=251550; pass_hash=0c0691a06e4ae99bd04dc3c1c45bef3fbe539009")
 		else
-			message:Reply("Random gelbooru! (".. (picked + 1) .."/".. count .." | "..text..") url = http://gelbooru.com/index.php?page=post&s=view&id=" .. id .. " tags = " .. tags2)
+			message:Reply("No gelbooru image found!")
 		end
-	else
-		message:Reply("No gelbooru image found!")
-	end
+	end, "user_id=251550; pass_hash=0c0691a06e4ae99bd04dc3c1c45bef3fbe539009")
 end, "HENTAAAAAAAAAAAAAI", "")
 Commands.Alias("!gelbooru", "!hentai")
 
@@ -28,10 +29,6 @@ Commands.Register("!e621", function(message, words, text)
 	local tags = ""
 	if #words > 0 then
 		tags = Webclient.Encode(text)
-	end
-	if #words > 6 then
-		message:Reply("You need to have less than 6 tags :(")
-		return
 	end
 	Webclient.FetchAsync("http://e621.net/post/index.xml?tags="..tags.. "&limit=1", function(str)
 		local count = tonumber(str:match("count=\"([%d]+)"))
@@ -45,10 +42,16 @@ Commands.Register("!e621", function(message, words, text)
 				else
 					message:Reply("Random e621! (".. (picked + 1) .."/".. count .." | "..text..") url = http://e621.net/post/show/" .. id .. " tags = " .. tags2)
 				end
+			end, 
+			function(error) 
+				message:Reply("Random e621 error: "  .. error)
 			end)
 		else
 			message:Reply("No e621 image found!")
 		end
+	end, 
+	function(error) 
+		message:Reply("No more than 6 tags")
 	end)
 end, "e621", "")
 Commands.Alias("!e621", "!yiff")

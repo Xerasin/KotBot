@@ -9,8 +9,9 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>KotBot</RootNamespace>
     <AssemblyName>KotBot</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -52,20 +53,52 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="IrcDotNet, Version=0.4.1.37926, Culture=neutral, PublicKeyToken=44f6d157e750246b, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IrcDotNet.0.4.1\lib\net40\IrcDotNet.dll</HintPath>
+    <Reference Include="DiscordSharp, Version=0.6.2.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\DiscordSharp.0.6.2.0-rc1\lib\DiscordSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IrcDotNet, Version=0.6.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IrcDotNet.0.6.0\lib\net451\IrcDotNet.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="KeraLua, Version=1.3.2.0, Culture=neutral, PublicKeyToken=04d04586786c6f34, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NLua.1.3.2.1\lib\net45\KeraLua.dll</HintPath>
+      <Private>True</Private>
     </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    <Reference Include="NAudio, Version=1.7.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\NAudio.1.7.3\lib\net35\NAudio.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nito.AsyncEx, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Concurrent, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.Concurrent.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Nito.AsyncEx.Enlightenment, Version=3.0.1.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Nito.AsyncEx.3.0.1\lib\net45\Nito.AsyncEx.Enlightenment.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="NLua, Version=1.3.2.0, Culture=neutral, PublicKeyToken=8df2ab518030ea95, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\NLua.1.3.2.1\lib\net45\NLua.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="protobuf-net">
+      <HintPath>..\packages\protobuf-net.2.0.0.668\lib\net40\protobuf-net.dll</HintPath>
+    </Reference>
+    <Reference Include="RestSharp, Version=105.2.3.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\RestSharp.105.2.3\lib\net451\RestSharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="SteamKit2, Version=1.7.0.33680, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\SteamKit2.1.7.0\lib\net45\SteamKit2.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -75,8 +108,20 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="websocket-sharp, Version=1.0.2.36589, Culture=neutral, PublicKeyToken=5660b08a1845a91e, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocketSharp.1.0.3-rc9\lib\websocket-sharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="WebSocket4Net, Version=0.14.1.0, Culture=neutral, PublicKeyToken=eb4e154b696bf72a, processorArchitecture=MSIL">
+      <HintPath>..\packages\WebSocket4Net.0.14.1\lib\net45\WebSocket4Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Discord\DiscordChatClient.cs" />
+    <Compile Include="Discord\DiscordManager.cs" />
+    <Compile Include="Discord\DiscordPMClient.cs" />
+    <Compile Include="Discord\DiscordUser.cs" />
     <Compile Include="GeneralBot\Client.cs" />
     <Compile Include="IRC\IRCBot.cs" />
     <Compile Include="IRC\IRCChannelClient.cs" />
@@ -94,21 +139,28 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="GeneralBot\User.cs" />
+    <Compile Include="Steam\SteamManager.cs" />
+    <Compile Include="Steam\SteamChatClient.cs" />
+    <Compile Include="Steam\SteamPMClient.cs" />
+    <Compile Include="Steam\SteamUser.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="libsodium.dll" />
     <Content Include="lua\**\*.*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <Content Include="opus.dll" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>
 xcopy /s /y "C:\Users\Jacob\Documents\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" "$(TargetDir)"
-xcopy /s /y "F:\Gits\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" "$(TargetDir)"</PostBuildEvent>
+xcopy /s /y "F:\Gits\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" "$(TargetDir)"
+xcopy /s /y "E:\Gits\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" "$(TargetDir)"</PostBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

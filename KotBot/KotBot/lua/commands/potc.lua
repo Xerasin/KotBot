@@ -1,5 +1,5 @@
 Commands.Register("potcfdk", function(message, words) 
-	message:Reply("Go fuck yourself")
+	message:Reply("he's alright")
 end, "Uh", "")
 Commands.Register("katie", function(message, words) 
 	message:Reply("She brings the sex in sexy") 

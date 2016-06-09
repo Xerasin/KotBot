@@ -1,5 +1,5 @@
 ircs = {
-	["66.151.244.66"] = {
+	--[=[["66.151.244.66"] = {
 		NickName = "KotBot",
 		RealName = "Katie Bot",
 		UserName = "KotBot",
@@ -10,7 +10,7 @@ ircs = {
 			"#test",
 			"#gcinema",
 		}
-	}
+	}]=]
 
 }
 clients = {}
@@ -29,13 +29,15 @@ for k,v in pairs(ircs) do
 end
 
 hook.Add("IRC.Disconnected", "IRC.Connected", function(client)
-	local new_client = IRC.Reconnect(client)
-	if clients[client] then
-		local IP = clients[client]
-		local tab = ircs[IP]
-		tab.client = new_client
-		clients[client] = nil
-		clients[new_client] = IP
+	if client then
+		local new_client = IRC.Reconnect(client)
+		if clients[client] then
+			local IP = clients[client]
+			local tab = ircs[IP]
+			tab.client = new_client
+			clients[client] = nil
+			clients[new_client] = IP
+		end
 	end
 end)
 

@@ -59,6 +59,8 @@ namespace KotBot.Scripting
             registerAttributesFromClass(typeof(Log));
             registerAttributesFromClass(typeof(LuaJSON));
             registerAttributesFromClass(typeof(LuaWebClient));
+            registerAttributesFromClass(typeof(Steam.SteamManager));
+            registerAttributesFromClass(typeof(Discord.DiscordManager));
             //registerAttributesFromClass(typeof(LuaAIML));
         }
         public static void LoadAll(bool firstload)
@@ -130,7 +132,7 @@ namespace KotBot.Scripting
                     }
                     catch (LuaException e)
                     {
-                        Log.Error(e.Message);
+                        Log.Error(e.Message + " : " + e.InnerException.Message);
                     }
                 }
             }
@@ -237,6 +239,8 @@ namespace KotBot.Scripting
             }
             catch(LuaException e)
             {
+                
+                Scripting.LuaHook.Call("Error", e);
                 returns = e.Message;
                 return false;
             }

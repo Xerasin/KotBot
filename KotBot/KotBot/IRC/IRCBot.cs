@@ -19,10 +19,10 @@ namespace KotBot
         [Scripting.RegisterLuaFunction("IRC.Connect")]
         public static IrcClient Connect(string IP, IrcDotNet.IrcUserRegistrationInfo info)
         {
-            var client = new IrcClient();
+            var client = new StandardIrcClient();
             return ConnectWithClient(client, IP, info);
         }
-        public static IrcClient ConnectWithClient(IrcClient client, string IP, IrcDotNet.IrcUserRegistrationInfo info)
+        public static StandardIrcClient ConnectWithClient(StandardIrcClient client, string IP, IrcDotNet.IrcUserRegistrationInfo info)
         {
             client.FloodPreventer = new IrcStandardFloodPreventer(100, 2000);
             client.Connected += client_Connected;

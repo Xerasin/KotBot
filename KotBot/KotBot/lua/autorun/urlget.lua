@@ -48,7 +48,7 @@ hook.Add("MessageRecieved", "MessageRecieved.urlgrabber", function(message)
 				local status, url_data = pcall(client.DownloadString, client, word)
 				if status then
 					local title = url_data:match("<title>(.+)</title>") or "???"
-					cache[word] = title
+					cache[word] = Webclient.Decode(title)
 					PrintURL(message, word, cache[word])
 				end
 			else
