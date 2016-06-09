@@ -1,7 +1,4 @@
 Steam = Steam or {}
---import("SteamKit2")
---import("SteamKit2.Unified.Internal")
-
 function Steam.GetSteamIDFromCommunity(url)
 	local client = Webclient.Create()
 	local url = url .. "?xml=1"
@@ -11,8 +8,3 @@ function Steam.GetSteamIDFromCommunity(url)
 		return t
 	end
 end
-
-hook.Add("SteamOnLogin", "Hooks", function(callback)
-	local manager = Steam.GetCallbackManager
-
-end)

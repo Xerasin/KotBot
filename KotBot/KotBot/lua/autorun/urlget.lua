@@ -19,6 +19,8 @@ function lengthToLengthString(length)
 	return TimeS
 end
 hook.Add("MessageRecieved", "MessageRecieved.urlgrabber", function(message)
+	local loc = message:GetClient():GetLocationString()
+	if loc:sub(1, 9) == "|Discord|" then return end
 	local user = message:GetClient():GetName()
 	local name = message:GetSender():GetName()
 	if name == user then return end

@@ -11,10 +11,16 @@ Commands.Register("!gelbooru", function(message, words, text)
 			local str = Webclient.FetchAsync("http://gelbooru.com/index.php?page=dapi&s=post&q=index&tags="..tags.. "&limit=1&pid=" .. picked, function(str)
 				local id = tonumber(str:match("id=\"([%d]+)"))
 				local tags2 = str:match("tags=\"([^\"]+)\"")
+				local fileURL = str:match("file_url=\"([^\"]+)\"")
+				local realURL = "http://gelbooru.com/index.php?page=post&s=view&id=" .. id
+				local outputUrl = realURL
 				if not id or id == "" then
 					message:Reply("No gelbooru image found! (Error?)")
 				else
-					message:Reply("Random gelbooru! (".. (picked + 1) .."/".. count .." | "..text..") url = http://gelbooru.com/index.php?page=post&s=view&id=" .. id .. " tags = " .. tags2)
+					local loc = message:GetClient():GetLocationString()
+					local text = "Random gelbooru! (".. (picked + 1) .."/".. count .." | "..text..") url = " .. outputUrl .. " tags = " .. tags2
+					if loc:sub(1, 9) == "|Discord|" then text = text .. " image = " .. fileURL end
+					message:Reply(text)
 				end
 			end, "user_id=251550; pass_hash=0c0691a06e4ae99bd04dc3c1c45bef3fbe539009")
 		else
