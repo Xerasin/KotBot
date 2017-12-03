@@ -263,7 +263,6 @@
     <Compile Include="GeneralBot\Client.cs" />
     <Compile Include="GeneralBot\Message.cs" />
     <Compile Include="GeneralBot\User.cs" />
-    <Compile Include="Modules\DefaultCommands\Reload.cs" />
     <Compile Include="Modules\ModuleCommands.cs" />
     <Compile Include="Modules\ModuleCommunications.cs" />
     <Compile Include="Modules\ModuleConfig.cs" />
@@ -304,7 +303,9 @@
 xcopy /s /y "E:\Gits\KotBot\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" "$(TargetDir)\lib"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
-    <PreBuildEvent>::mklink /D $(TargetDir)csharp  $(SolutionDir)Modules\csharp</PreBuildEvent>
+    <PreBuildEvent>::@echo off
+::del /s "$(SolutionDir)\csharp" 1&gt;nul
+::cmd /C mklink /D /J "$(TargetDir)csharp" "$(SolutionDir)\csharp" 1&gt;nul</PreBuildEvent>
   </PropertyGroup>
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
