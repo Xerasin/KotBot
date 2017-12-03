@@ -21,12 +21,35 @@ namespace KotBot.Modules
 
     [Serializable]
     public delegate bool MessageEvent(MessageArgs args);
+
+    [Serializable]
+    public class ModuleArgs : EventArgs
+    {
+        public string Module { get; set; }
+        public ModuleWrap ModuleWrap { get; set; }
+    }
+    [Serializable]
+    public delegate bool ModuleEvent(ModuleArgs args);
+
     [Serializable]
     public static class ModuleCommunications
     {
         public static event MessageEvent MessageSent;
         public static event MessageEvent MessageReceived;
         public static event MessageEvent ShouldProcessMessage;
+        public static event ModuleEvent ModuleLoaded;
+        
+        public static bool OnModuleLoaded(string module, ModuleWrap inputModule)
+        {
+            if (ModuleLoaded == null)
+                return true;
+            return ModuleLoaded(new ModuleArgs()
+            {
+                ModuleWrap = inputModule,
+                Module = module
+            });
+        }
+
         public static bool OnMessageReceived(string module, Message inputMessage)
         {
             if (MessageReceived == null)

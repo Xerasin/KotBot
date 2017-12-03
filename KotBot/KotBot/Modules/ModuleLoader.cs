@@ -244,6 +244,7 @@ namespace KotBot.Modules
                 var outMain = methodInfo.Invoke(null, new[] { new string[] { module } });
                 ModuleCommands.RegisterAssembliesComamnds(module, assembly);
                 loadedModules[module] = new ModuleWrap { Domain = null, Assembly = assembly};
+                
             }
             catch(Exception compillationFailed)
             {
@@ -251,7 +252,7 @@ namespace KotBot.Modules
                 return false;
             }
             Log.Print($"Module {module} loaded successfully took {(DateTime.Now - start).Milliseconds}ms");
-
+            ModuleCommunications.OnModuleLoaded(module, loadedModules[module]);
             return true;
 
         }

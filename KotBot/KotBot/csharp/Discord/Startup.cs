@@ -19,12 +19,23 @@ namespace Plugin
             if (!string.IsNullOrWhiteSpace(token))
             {
                 DiscordManager.Start(token);
+            } 
+
+            ModuleCommunications.ModuleLoaded += ModuleCommunications_ModuleLoaded;
+        }
+
+        private static bool ModuleCommunications_ModuleLoaded(ModuleArgs args)
+        {
+            if(args.Module == "Lua") 
+            {
+                KotBot.DiscordBot.LuaDiscord.LoadAll(args.ModuleWrap.Assembly);
             }
-            
+            return true;
         }
         public static void Close()
         {
             DiscordManager.Close();
+            ModuleCommunications.ModuleLoaded -= ModuleCommunications_ModuleLoaded;
         }
 
         static bool IsActive()

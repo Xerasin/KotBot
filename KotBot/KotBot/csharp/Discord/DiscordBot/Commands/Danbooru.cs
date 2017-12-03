@@ -6,8 +6,30 @@ using System.Threading.Tasks;
 using KotBot.Modules;
 using System.Net;
 using Newtonsoft.Json.Linq;
-namespace KotBot.csharp.Discord.DiscordBot.Commands
+namespace KotBot.DiscordBot
 {
+    public enum ProcessFilter {SFW, SNSFW, NSFW, NONE}; 
+    public static class TagProcessor
+    {
+        public static string ProcessTags(string tags, ProcessFilter filter)
+        {
+            if(filter == ProcessFilter.NONE) return tags;
+            if(filter == ProcessFilter.SFW)
+            {
+                if(!tags.Contains("rating:safe"))
+                    tags = tags + " rating:safe";
+                tags = tags.Replace("rating:explicit", "rating:safe");
+                tags = tags.Replace("rating:questionable", "rating:safe");
+                tags = tags.Replace("-rating:safe", "rating:safe");
+            }
+            else if(filter == ProcessFilter.SNSFW)
+            {
+                if(!tags.Contains("-rating:explicit"))
+                    tags = tags + " -rating:explicit";
+            }
+            return tags;
+        }
+    }
     [Modules.CommandInfo("db", "danbooru", "Discord", "Danbooru!")]
     public class Danbooru : Modules.ModuleCommand
     {
@@ -16,13 +38,16 @@ namespace KotBot.csharp.Discord.DiscordBot.Commands
             WebClient client = new WebClient();
             client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
             client.Proxy = null;
-            string output = "";
-            foreach(string str in args)
+            ProcessFilter filter = ProcessFilter.NSFW;
+            if(originalMessage.message.GetClient().GetType() == typeof(KotBot.DiscordBot.DiscordChatClient))
             {
-                output += str;
-                output += " ";
+                Discord.WebSocket.Socket​Text​Channel channel = ((KotBot.DiscordBot.DiscordChatClient)originalMessage.message.GetClient()).channel;
+                /*if(!channel.IsNsfw)
+                {
+                    filter = ProcessFilter.SFW;
+                }*/
             }
-            output = output.TrimEnd(' ');
+            string output = TagProcessor.ProcessTags(completeText, filter);
             try
             {
                 client.DownloadStringCompleted += (object sender, DownloadStringCompletedEventArgs e) =>

@@ -185,3 +185,4 @@ FakesAssemblies/
 # Added
 !lua/
 !lua/*
+KotBot/KotBot/csharp/config\.cfg

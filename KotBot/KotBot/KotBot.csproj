@@ -263,6 +263,7 @@
     <Compile Include="GeneralBot\Client.cs" />
     <Compile Include="GeneralBot\Message.cs" />
     <Compile Include="GeneralBot\User.cs" />
+    <Compile Include="ModuleCompat\RegisterLuaFunction.cs" />
     <Compile Include="Modules\ModuleCommands.cs" />
     <Compile Include="Modules\ModuleCommunications.cs" />
     <Compile Include="Modules\ModuleConfig.cs" />

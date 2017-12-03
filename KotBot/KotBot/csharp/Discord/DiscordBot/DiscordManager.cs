@@ -9,6 +9,8 @@ using KotBot;
 using KotBot.BotManager;
 using DWebSocket = Discord.WebSocket;
 using KotBot.Modules;
+using KotBot.Scripting;
+
 namespace KotBot.DiscordBot
 {
     [Serializable]
@@ -75,7 +77,8 @@ namespace KotBot.DiscordBot
             }
             return null;
         }
-
+        
+        [RegisterLuaFunction("discord.SetAvatar", "", "")]
         public static void SetAvatar(string url)
         {
             System.Net.WebClient wc = new WebClient();

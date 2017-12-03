@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace KotBot.Scripting
 {
-    class RegisterLuaFunction : Attribute
+    public class RegisterLuaFunction : Attribute
     {
         public string details;
         public string name;
@@ -17,7 +17,5 @@ namespace KotBot.Scripting
             this.name = name;
             this.args = args;
         }
-
-        
     }
 }
