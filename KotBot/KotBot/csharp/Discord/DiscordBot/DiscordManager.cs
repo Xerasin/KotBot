@@ -14,8 +14,21 @@ using KotBot.Scripting;
 namespace KotBot.DiscordBot
 {
     [Serializable]
+    public class DiscordMessageArgs : EventArgs
+    {
+        public DWebSocket.SocketMessage Message { get; set; }
+        public DWebSocket.DiscordSocketClient Client { get; set; }
+        public DWebSocket.SocketGuildUser User { get; set; }
+        public DWebSocket.SocketTextChannel Channel { get; set; }
+        public Message GenericMessage {get; set; }
+    }
+    [Serializable]
+    public delegate bool DiscordMessageEvent(DiscordMessageArgs args);
+
+    [Serializable]
     public static class DiscordManager
     {
+        public static event DiscordMessageEvent DiscordMessage;
         public static DWebSocket.DiscordSocketClient client;
         public async static void Start(string token)
         {
@@ -45,6 +58,7 @@ namespace KotBot.DiscordBot
         {
             
             Log.Print($"Discord Connected, User: {client.CurrentUser.Username}");
+            MiscDiscord.Init();
             return null;
         }
 
@@ -73,7 +87,19 @@ namespace KotBot.DiscordBot
                 if (ModuleCommunications.OnShouldProcessMessage("Discord", chatMessage))
                 {
                     ModuleCommunications.OnMessageReceived("Discord", chatMessage);
-                }
+
+                    if (DiscordMessage != null)
+                    {
+                        DiscordMessage(new DiscordMessageArgs()
+                        {
+                            Message = arg,
+                            Channel = channel,
+                            Client = client,
+                            User = channel.GetUser(arg.Author.Id),
+                            GenericMessage = chatMessage
+                        });
+                    }
+                }  
             }
             return null;
         }
