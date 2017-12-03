@@ -35,7 +35,7 @@ namespace KotBot.Modules
     public abstract class ModuleCommand
     {
         public abstract bool ShouldCall(string source);
-        public abstract bool OnCall(List<string> args, MessageArgs originalMessage);
+        public abstract bool OnCall(List<string> args, MessageArgs originalMessage, string fullText);
         public virtual bool OnHelp(MessageArgs args)
         {
             args.message.Reply($"No help for command {Info.Name}");
@@ -49,6 +49,7 @@ namespace KotBot.Modules
     {
         private static bool IsSetup = false;
         public static string commandStart { get; set; } = "!";
+        public static char seperator { get; set; } = ' ';
         public static Dictionary<string, ModuleCommand> commands = new Dictionary<string, ModuleCommand>();
         public static void Setup()
         {
@@ -104,16 +105,24 @@ namespace KotBot.Modules
         {
             if(!string.IsNullOrWhiteSpace(args.text) && args.text.StartsWith(commandStart))
             {
-                List<string> words = new List<string>(args.text.Split(' '));
+                List<string> words = new List<string>(args.text.Split(seperator));
                 if(words.Count > 0 && words[0].Length > commandStart.Length)
                 {
                     string commandName = words[0].Substring(commandStart.Length);
+                    string restOfText = args.text.Substring(words[0].Length + 1);
                     words.RemoveAt(0);
                     if(commands.ContainsKey(commandName))
                     {
                         if(commands[commandName].ShouldCall(args.module))
                         {
-                            commands[commandName].OnCall(words, args);
+                            try
+                            {
+                                commands[commandName].OnCall(words, args, restOfText);
+                            }
+                            catch(Exception commandFailure)
+                            {
+                                args.message.Reply($"Command {commandName} failed \"{commandFailure.Message}\" \n {commandFailure.StackTrace}");
+                            }
                         }
                     }
                 }

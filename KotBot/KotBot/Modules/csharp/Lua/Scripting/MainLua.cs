@@ -59,17 +59,11 @@ namespace KotBot.Scripting
             LuaInstance = new Lua();
             registerAttributesFromClass(typeof(LuaTimer));
             registerAttributesFromClass(typeof(LuaHook));
-            //registerAttributesFromClass(typeof(LuaEntUtil));
             registerAttributesFromClass(typeof(MainLua));
-            registerAttributesFromClass(typeof(IRCBot));
             registerAttributesFromClass(typeof(Log));
             registerAttributesFromClass(typeof(LuaJSON));
             registerAttributesFromClass(typeof(LuaWebClient));
             registerAttributesFromClass(typeof(LuaTask));
-            registerAttributesFromClass(typeof(Steam.SteamManager));
-            //registerAttributesFromClass(typeof(DiscordBot.DiscordManager));
-            //registerAttributesFromClass(typeof(DiscordBot.DiscordVoiceManager));
-            //registerAttributesFromClass(typeof(LuaAIML));
         }
         public static void LoadAll(bool firstload)
         {
@@ -202,7 +196,7 @@ namespace KotBot.Scripting
 
         }
         [RegisterLuaFunction("dolua")]
-        public static object DoString(string code, out object returns, params object[] t)
+        public static bool DoString(string code, out object returns, params object[] t)
         {
             Dictionary<string, object> stuff = new Dictionary<string, object>();
             if (t.Length % 2 == 0)
@@ -224,7 +218,7 @@ namespace KotBot.Scripting
             }
         }
 
-        public static object DoString(string code, Dictionary<string, object> locals, out object returns)
+        public static bool DoString(string code, Dictionary<string, object> locals, out object returns)
         {
             string header = "";
             Dictionary<string, object> newLocals = MergeTab(PermaLocals, locals);

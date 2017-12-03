@@ -9,28 +9,41 @@ namespace KotBot.Modules.DefaultCommands
     [CommandInfo("reload", "Reload modules", "Global", "Reloads all modules or only one")]
     public class Reload : Modules.ModuleCommand
     {
-        public override bool OnCall(List<string> args, MessageArgs originalMessage)
+        private static DateTime lastReload = DateTime.Now.AddSeconds(-20);
+        private static bool currentlyRunning = false;
+        public override bool OnCall(List<string> args, MessageArgs originalMessage, string fullText)
         {
-            if (args.Count > 0)
+            if (currentlyRunning) return false;
+            try
             {
-                if (!Modules.ModuleLoader.Load(args[0]))
-                    originalMessage.message.Reply($"Failed to load module {args[0]}! *runs crying*");
+                currentlyRunning = true;
+                lastReload = DateTime.Now;
+                if (fullText.Length > 0)
+                {
+                    if (!Modules.ModuleLoader.Load(fullText))
+                        originalMessage.message.Reply($"Failed to load module {fullText}! *runs crying*");
+                    else
+                        originalMessage.message.Reply($"Success module {fullText} reloaded! hehehe <3");
+                }
                 else
-                    originalMessage.message.Reply($"Success module {args[0]} reloaded! hehehe <3");
+                {
+                    if (!Modules.ModuleLoader.LoadAllModules())
+                        originalMessage.message.Reply($"Failed to load modules! *runs crying*");
+                    else
+                        originalMessage.message.Reply($"Success modules reloaded! hehehe <3");
+                }
+                currentlyRunning = false;
             }
-            else
+            catch(Exception)
             {
-                if(!Modules.ModuleLoader.LoadAllModules())
-                    originalMessage.message.Reply($"Failed to load modules! *runs crying*");
-                else
-                    originalMessage.message.Reply($"Success modules reloaded! hehehe <3");
+                currentlyRunning = false;
             }
             return true;
         }
 
         public override bool ShouldCall(string source)
         {
-            throw new NotImplementedException();
+            return (DateTime.Now - lastReload).Seconds > 1;
         }
     }
 }

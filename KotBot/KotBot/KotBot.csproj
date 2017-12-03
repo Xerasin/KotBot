@@ -301,7 +301,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <PostBuildEvent>
-xcopy /s /y "E:\Gits\KotBot\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" "$(TargetDir)"</PostBuildEvent>
+xcopy /s /y "E:\Gits\KotBot\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" "$(TargetDir)\lib"</PostBuildEvent>
   </PropertyGroup>
   <PropertyGroup>
     <PreBuildEvent>::mklink /D $(TargetDir)csharp  $(SolutionDir)Modules\csharp</PreBuildEvent>
@@ -313,4 +313,10 @@ xcopy /s /y "E:\Gits\KotBot\KotBot\KotBot\packages\NLua.1.3.2.1\lib\native\*.*" 
   <Target Name="AfterBuild">
   </Target>
   -->
+  <Target Name="AfterBuild">
+    <ItemGroup>
+      <MoveToLibFolder Include="$(OutputPath)*.dll ; $(OutputPath)*.pdb ; $(OutputPath)*.xml" />
+    </ItemGroup>
+    <Move SourceFiles="@(MoveToLibFolder)" DestinationFolder="$(OutputPath)lib" OverwriteReadOnlyFiles="true" />
+  </Target>
 </Project>

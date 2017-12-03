@@ -13,6 +13,7 @@ using System.Runtime.Remoting;
 using System.Diagnostics;
 using System.Security;
 using System.Security.Permissions;
+using Microsoft.CodeAnalysis.Text;
 
 namespace KotBot.Modules
 {
@@ -50,9 +51,11 @@ namespace KotBot.Modules
                 if(filename.EndsWith(".cs"))
                 {
                     string text = File.ReadAllText(filename);
-                    SyntaxTree tree = CSharpSyntaxTree.ParseText(text);
-                    tree.WithFilePath(filename);
-                    syntaxTrees.Add(tree);
+                    using (var stream = File.OpenRead(filename))
+                    {
+                        SyntaxTree tree = CSharpSyntaxTree.ParseText(SourceText.From(stream), path: filename);
+                        syntaxTrees.Add(tree);
+                    }
                 }
             }
             foreach (string directory in Directory.GetDirectories($"{folder}/"))
@@ -122,6 +125,9 @@ namespace KotBot.Modules
                 var outMain = methodInfo.Invoke(null, null);
                 loadedModules.Remove(module);
             }
+            string[] dirs = Directory.GetDirectories($"csharp/");
+            if (!Directory.GetDirectories($"csharp/").Contains<string>($"csharp/{module}"))
+                return false;
             if (!Directory.Exists($"csharp/{module}"))
                 return false;
             string dllFolder = $"csharp/{module}/";
@@ -148,6 +154,7 @@ namespace KotBot.Modules
                     MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.Linq.JToken).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(System.AsyncCallback).Assembly.Location),
                     MetadataReference.CreateFromFile(typeof(System.IO.BinaryReader).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(System.Web.HttpUtility).Assembly.Location),
                 });
                 var assemblies = AppDomain.CurrentDomain.GetAssemblies();
                 foreach(var loadedAssemblies in assemblies)
@@ -158,7 +165,7 @@ namespace KotBot.Modules
                     if(!string.IsNullOrWhiteSpace(location))
                      defaultReferences.Add(MetadataReference.CreateFromFile(location));
                 }
-                foreach(var dlls in Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory))
+                foreach(var dlls in Directory.GetFiles($"{AppDomain.CurrentDomain.BaseDirectory}/lib"))
                 {
                     if(dlls.EndsWith(".dll"))
                     {
@@ -214,7 +221,14 @@ namespace KotBot.Modules
 
                         if (!result.Success)
                         {
-                            Log.Error($"Module {module} failed to load {result.Diagnostics}");
+                            Log.Error($"Module {module} failed to load with errors:");
+                            foreach(var error in result.Diagnostics)
+                            {
+                                if(error.IsWarningAsError || error.Severity == DiagnosticSeverity.Error)
+                                {
+                                    Log.Error($"{error.GetMessage()} : {error.Location.ToString()}");
+                                }
+                            }
                             return false;
                         }
                         compiledAssembly = output.ToArray();

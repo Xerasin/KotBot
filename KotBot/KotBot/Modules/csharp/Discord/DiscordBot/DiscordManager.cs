@@ -42,7 +42,7 @@ namespace KotBot.DiscordBot
         private static Task Client_Connected()
         {
             
-            Console.WriteLine($"Discord Connected, User: {client.CurrentUser.Username}");
+            Log.Print($"Discord Connected, User: {client.CurrentUser.Username}");
             return null;
         }
 

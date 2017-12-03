@@ -11,7 +11,7 @@ namespace KotBot.csharp.Discord.DiscordBot.Commands
     [Modules.CommandInfo("db", "danbooru", "Discord", "Danbooru!")]
     public class Danbooru : Modules.ModuleCommand
     {
-        public override bool OnCall(List<string> args, MessageArgs originalMessage)
+        public override bool OnCall(List<string> args, MessageArgs originalMessage, string completeText)
         {
             WebClient client = new WebClient();
             client.Headers.Add("user-agent", "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.2; .NET CLR 1.0.3705;)");
@@ -53,6 +53,24 @@ namespace KotBot.csharp.Discord.DiscordBot.Commands
             {
                 originalMessage.message.Reply($"Failed to find danbooru image for {output}");
             }
+            return true;
+        }
+
+        public override bool ShouldCall(string source)
+        {
+            if(source == "Discord")
+            {
+                return true;
+            }
+            return false;
+        }
+    }
+    [Modules.CommandInfo("gelbooru", "gelbooru", "Discord", "Gelbooru!")]
+    public class Gelbooru : Modules.ModuleCommand
+    {
+        public override bool OnCall(List<string> args, MessageArgs originalMessage, string completeText)
+        {
+            originalMessage.message.Reply("Gelbooru has their API disabled! :(");
             return true;
         }
 
