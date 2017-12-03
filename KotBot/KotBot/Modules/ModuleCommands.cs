@@ -111,7 +111,10 @@ namespace KotBot.Modules
                     words.RemoveAt(0);
                     if(commands.ContainsKey(commandName))
                     {
-                        commands[commandName].OnCall(words, args);
+                        if(commands[commandName].ShouldCall(args.module))
+                        {
+                            commands[commandName].OnCall(words, args);
+                        }
                     }
                 }
             }

@@ -24,9 +24,10 @@ namespace KotBot.DiscordBot
         }
         public override object Message(string message)
         {
+            if (this.client.LoginState != LoginState.LoggedIn) return null;
             message = this.ProcessMessage(message);
             Task<Discord.Rest.RestUserMessage> dMessage = channel.SendMessageAsync(message);
-            ModuleCommunications.OnMessageSent(new Message(this, new DiscordUser(client.CurrentUser, client), message));
+            ModuleCommunications.OnMessageSent("Discord", new Message(this, new DiscordUser(client.CurrentUser, client), message));
             dMessage.Wait();
             return dMessage.Result;
         }

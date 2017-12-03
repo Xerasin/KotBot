@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using DWebSocket = Discord.WebSocket;
 using KotBot;
 using KotBot.BotManager;
+using Discord;
+
 namespace KotBot.DiscordBot
 {
     [Serializable]
@@ -24,6 +26,7 @@ namespace KotBot.DiscordBot
 
         public override object Message(string message)
         {
+            if (this.client.LoginState != LoginState.LoggedIn) return null;
             if (other == null) return null;
             DiscordUser user = new DiscordUser(other, client);
             return user.Message(message);

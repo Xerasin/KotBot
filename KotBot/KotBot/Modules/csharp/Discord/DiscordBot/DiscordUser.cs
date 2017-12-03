@@ -57,7 +57,7 @@ namespace KotBot.DiscordBot
             channel.Wait();
             Task<Discord.IUserMessage> dMessage = channel.Result.SendMessageAsync(message);
             dMessage.Wait();
-            ModuleCommunications.OnMessageSent(new Message(new DiscordPMClient(client.CurrentUser, this.member, client), new DiscordUser(client.GetUser(client.CurrentUser.Id), client), message));
+            ModuleCommunications.OnMessageSent("Discord", new Message(new DiscordPMClient(client.CurrentUser, this.member, client), new DiscordUser(client.GetUser(client.CurrentUser.Id), client), message));
             return dMessage.Result;
         }
         public override string GetUserID()

@@ -61,16 +61,16 @@ namespace KotBot.DiscordBot
             {
 
                 Message chatMessage2 = new Message(new DiscordPMClient(arg.Author, ((DWebSocket.SocketDMChannel)arg.Channel).Recipient, client), new DiscordUser(arg.Author, client), arg.Content);
-                ModuleCommunications.OnMessageReceived(chatMessage2);
+                ModuleCommunications.OnMessageReceived("Discord", chatMessage2);
                 return null;
             }
             if (typeof(DWebSocket.SocketTextChannel) == arg.Channel.GetType())
             {
                 DWebSocket.SocketTextChannel channel = (DWebSocket.SocketTextChannel)arg.Channel;
                 Message chatMessage = new Message(new DiscordChatClient(client, channel.GetUser(arg.Author.Id), channel), new DiscordUser(channel.GetUser(arg.Author.Id), client), arg.Content);
-                if (ModuleCommunications.OnShouldProcessMessage(chatMessage))
+                if (ModuleCommunications.OnShouldProcessMessage("Discord", chatMessage))
                 {
-                    ModuleCommunications.OnMessageReceived(chatMessage);
+                    ModuleCommunications.OnMessageReceived("Discord", chatMessage);
                 }
             }
             return null;

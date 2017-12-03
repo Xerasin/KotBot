@@ -65,6 +65,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="csharp\Discord\DiscordBot\Commands\Appleping.cs" />
+    <Compile Include="csharp\Discord\DiscordBot\Commands\Danbooru.cs" />
     <Compile Include="csharp\Discord\DiscordBot\DiscordChatClient.cs">
       <CustomToolNamespace>KotBot</CustomToolNamespace>
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>

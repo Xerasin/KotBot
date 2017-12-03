@@ -19,34 +19,7 @@ namespace KotBot.Modules
     public class ModuleWrap
     {
         public AppDomain Domain {get; set;}
-    }
-
-    [Serializable]
-    public class AsmLoad
-    {
-        public string module;
-        public byte[] AsmData;
-        public AppDomain Domain;
-        public static AsmLoad LoadedInstance;
-        public void LoadAsm()
-        {
-            var assembly = Assembly.Load(AsmData);
-
-            var pluginType = assembly.GetType("Plugin.Plugin");
-            var methods = pluginType.GetMethods();
-            var methodInfo = pluginType.GetMethod("Main", BindingFlags.Static | BindingFlags.Public);
-            var outMain = methodInfo.Invoke(null, new[] { new string[] { module } });
-            LoadedInstance = this;
-        }
-
-        public static AppDomain Execute(string module, byte[] assemblyBytes)
-        {
-            AsmLoad asmLoad = new AsmLoad() { module = module, AsmData = assemblyBytes, Domain = AppDomain.CurrentDomain};
-            var app = AppDomain.CreateDomain(module, AppDomain.CurrentDomain.Evidence, new AppDomainSetup { ApplicationBase = AppDomain.CurrentDomain.BaseDirectory }, new PermissionSet(PermissionState.Unrestricted));
-            app.DoCallBack(new CrossAppDomainDelegate(asmLoad.LoadAsm));
-
-            return app;
-        }
+        public Assembly Assembly { get; set; }
     }
 
 
@@ -142,7 +115,11 @@ namespace KotBot.Modules
             if(loadedModules.ContainsKey(module))
             {
                 ModuleWrap wrap = loadedModules[module];
-                AppDomain.Unload(wrap.Domain);
+                Assembly assembly = wrap.Assembly;
+                var pluginType = assembly.GetType("Plugin.Plugin");
+                var methods = pluginType.GetMethods();
+                var methodInfo = pluginType.GetMethod("Close", BindingFlags.Static | BindingFlags.Public);
+                var outMain = methodInfo.Invoke(null, null);
                 loadedModules.Remove(module);
             }
             if (!Directory.Exists($"csharp/{module}"))
@@ -228,19 +205,31 @@ namespace KotBot.Modules
                     references: defaultReferences
                 );
                 byte[] compiledAssembly;
-                using (var output = new MemoryStream())
+                byte[] compiledSymbols;
+                using (var symbols = new MemoryStream())
                 {
-                    EmitResult result = compillation.Emit(output);
-
-                    if (!result.Success)
+                    using (var output = new MemoryStream())
                     {
-                        Log.Error($"Module {module} failed to load {result.Diagnostics}");
-                        return false;
+                        EmitResult result = compillation.Emit(output, symbols);
+
+                        if (!result.Success)
+                        {
+                            Log.Error($"Module {module} failed to load {result.Diagnostics}");
+                            return false;
+                        }
+                        compiledAssembly = output.ToArray();
+                        compiledSymbols = symbols.ToArray();
                     }
-                    compiledAssembly = output.ToArray();
                 }
-                AppDomain domain = AsmLoad.Execute(module, compiledAssembly);
-                loadedModules[module] = new ModuleWrap { Domain = domain };
+                
+                var assembly = Assembly.Load(compiledAssembly, compiledSymbols);
+
+                var pluginType = assembly.GetType("Plugin.Plugin");
+                var methods = pluginType.GetMethods();
+                var methodInfo = pluginType.GetMethod("Main", BindingFlags.Static | BindingFlags.Public);
+                var outMain = methodInfo.Invoke(null, new[] { new string[] { module } });
+                ModuleCommands.RegisterAssembliesComamnds(module, assembly);
+                loadedModules[module] = new ModuleWrap { Domain = null, Assembly = assembly};
             }
             catch(Exception compillationFailed)
             {
