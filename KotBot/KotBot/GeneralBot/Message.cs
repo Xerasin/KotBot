@@ -4,8 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KotBot
+namespace KotBot.BotManager
 {
+    [Serializable]
     public class Message
     {
         Client client;
@@ -17,11 +18,12 @@ namespace KotBot
             this.user = user;
             this.message = Message;
         }
-        public virtual void Reply(string message)
+        
+        public virtual object Reply(string message)
         {
-            this.client.Message(message);
+            return this.client.Message(message);
         }
-        public virtual Client GetClient()
+        public virtual Client GetClient()                                                                                       
         {
             return this.client;
         }

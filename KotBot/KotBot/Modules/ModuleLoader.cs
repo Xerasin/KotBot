@@ -1,0 +1,256 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
+using System.IO;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Emit;
+using System.Reflection;
+using System.Runtime.Remoting;
+using System.Diagnostics;
+using System.Security;
+using System.Security.Permissions;
+
+namespace KotBot.Modules
+{
+    public class ModuleWrap
+    {
+        public AppDomain Domain {get; set;}
+    }
+
+    [Serializable]
+    public class AsmLoad
+    {
+        public string module;
+        public byte[] AsmData;
+        public AppDomain Domain;
+        public static AsmLoad LoadedInstance;
+        public void LoadAsm()
+        {
+            var assembly = Assembly.Load(AsmData);
+
+            var pluginType = assembly.GetType("Plugin.Plugin");
+            var methods = pluginType.GetMethods();
+            var methodInfo = pluginType.GetMethod("Main", BindingFlags.Static | BindingFlags.Public);
+            var outMain = methodInfo.Invoke(null, new[] { new string[] { module } });
+            LoadedInstance = this;
+        }
+
+        public static AppDomain Execute(string module, byte[] assemblyBytes)
+        {
+            AsmLoad asmLoad = new AsmLoad() { module = module, AsmData = assemblyBytes, Domain = AppDomain.CurrentDomain};
+            var app = AppDomain.CreateDomain(module, AppDomain.CurrentDomain.Evidence, new AppDomainSetup { ApplicationBase = AppDomain.CurrentDomain.BaseDirectory }, new PermissionSet(PermissionState.Unrestricted));
+            app.DoCallBack(new CrossAppDomainDelegate(asmLoad.LoadAsm));
+
+            return app;
+        }
+    }
+
+
+    public static class ModuleLoader
+    {
+        public static Dictionary<string, ModuleWrap> loadedModules = new Dictionary<string, ModuleWrap>(); // todo wrap?
+        public static bool LoadAllModules()
+        {
+            foreach(var domain in loadedModules)
+            {
+                AppDomain.Unload(domain.Value.Domain);
+            }
+            loadedModules = new Dictionary<string, ModuleWrap>();
+            JArray modules = ModuleConfig.GetValue<JArray>(null, "loadedModules", new JArray());
+            foreach(JToken module in modules)
+            {
+                if (!Load(module.ToString())) return false; 
+            }
+            return true;
+        }
+        private static List<SyntaxTree> loadSyntaxTrees(string folder)
+        {
+            List<SyntaxTree> syntaxTrees = new List<SyntaxTree>();
+            if (!Directory.Exists(folder))
+                return syntaxTrees;
+            foreach (string filename in Directory.GetFiles(folder))
+            {
+                if(filename.EndsWith(".cs"))
+                {
+                    string text = File.ReadAllText(filename);
+                    SyntaxTree tree = CSharpSyntaxTree.ParseText(text);
+                    tree.WithFilePath(filename);
+                    syntaxTrees.Add(tree);
+                }
+            }
+            foreach (string directory in Directory.GetDirectories($"{folder}/"))
+            {
+                syntaxTrees.AddRange(loadSyntaxTrees($"{directory}"));
+            }
+            return syntaxTrees;
+        }
+        private static readonly IEnumerable<string> DefaultNamespaces = new[]
+        {
+            "System",
+            "System.IO",
+            "System.Net",
+            "System.Linq",
+            "System.Text",
+            "System.Text.RegularExpressions",
+            "System.Collections.Generic",
+            "System.Collections.Immutable",
+            "System.Collections",
+            "KotBot",
+            "KotBot.Modules",
+            "KotBot.BotManager",
+            "Newtonsoft.Json.Linq",
+            "Newtonsoft.Json",
+            "Discord",
+            "Discord.WebSocket",
+            "Discord.Net",
+            "Discord.Rest",
+            "Discord.Net.WebSockets",
+            "Discord.Net.Rest",
+            "System.IO",
+            "System.Interactive.Async"
+        };
+
+        private static bool DeleteWithWait(string filename, int timeoutMs = 1000)
+        {
+            var time = Stopwatch.StartNew();
+            while (time.ElapsedMilliseconds < timeoutMs)
+            {
+                try
+                {
+                    File.Delete(filename);
+                    return true;
+                }
+                catch (UnauthorizedAccessException) { }
+                catch (IOException e)
+                {
+                    // access error
+                    if (e.HResult != -2147024864)
+                        return false;
+                }
+            }
+            return false;
+        }
+
+
+        public static bool Load(string module)
+        {
+            AppDomain testDomain = AppDomain.CurrentDomain;
+            if(loadedModules.ContainsKey(module))
+            {
+                ModuleWrap wrap = loadedModules[module];
+                AppDomain.Unload(wrap.Domain);
+                loadedModules.Remove(module);
+            }
+            if (!Directory.Exists($"csharp/{module}"))
+                return false;
+            string dllFolder = $"csharp/{module}/";
+            string dllLoc = $"{dllFolder}{module}.dll";
+            if (File.Exists(dllLoc))
+            {
+                
+                if (!DeleteWithWait(dllLoc, 5000))
+                    return false;
+            }
+                
+            DateTime start = DateTime.Now;
+            try
+            {
+                var assemblyPath = Path.GetDirectoryName(typeof(object).Assembly.Location);
+                List<MetadataReference> defaultReferences = new List<MetadataReference>(new[]
+                {
+                    MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "mscorlib.dll")),
+                    MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.dll")),
+                    MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Core.dll")),
+                    MetadataReference.CreateFromFile(Path.Combine(assemblyPath, "System.Runtime.dll")),
+                    MetadataReference.CreateFromFile(typeof(System.Collections.Immutable.ImmutableArray).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(KotBot.BotManager.User).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(Newtonsoft.Json.Linq.JToken).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(System.AsyncCallback).Assembly.Location),
+                    MetadataReference.CreateFromFile(typeof(System.IO.BinaryReader).Assembly.Location),
+                });
+                var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+                foreach(var loadedAssemblies in assemblies)
+                {
+                    if (loadedAssemblies.FullName.Contains("Anonymous"))
+                        continue;
+                    string location = loadedAssemblies.Location;
+                    if(!string.IsNullOrWhiteSpace(location))
+                     defaultReferences.Add(MetadataReference.CreateFromFile(location));
+                }
+                foreach(var dlls in Directory.GetFiles(AppDomain.CurrentDomain.BaseDirectory))
+                {
+                    if(dlls.EndsWith(".dll"))
+                    {
+                        try
+                        {
+                            System.Reflection.AssemblyName testAssembly =
+                                System.Reflection.AssemblyName.GetAssemblyName(dlls);
+                            defaultReferences.Add(MetadataReference.CreateFromFile(dlls));
+
+                        }
+                        catch (Exception) {
+
+                        }
+                    }
+                }
+                string moduleBin = $"{AppDomain.CurrentDomain.BaseDirectory}/csharp/{module}/bin";
+                if(Directory.Exists(moduleBin))
+                {
+                    foreach (var dlls in Directory.GetFiles(moduleBin))
+                    {
+                        if (dlls.EndsWith(".dll"))
+                        {
+                            try
+                            {
+                                System.Reflection.AssemblyName testAssembly =
+                                    System.Reflection.AssemblyName.GetAssemblyName(dlls);
+                                defaultReferences.Add(MetadataReference.CreateFromFile(dlls));
+                                
+                            }
+                            catch (Exception) { }
+                        }   
+                    }
+                }
+                
+                List<string> newList = new List<string>(DefaultNamespaces);
+                List<SyntaxTree> syntaxTrees = loadSyntaxTrees($"csharp/{module}");
+                CSharpCompilationOptions defaultCompilationOptions = new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary)
+                            .WithOverflowChecks(true).WithOptimizationLevel(OptimizationLevel.Release)
+                            .WithAssemblyIdentityComparer(DesktopAssemblyIdentityComparer.Default);
+
+                Compilation compillation = CSharpCompilation.Create(module,
+                    options: defaultCompilationOptions,
+                    syntaxTrees: syntaxTrees.ToArray<SyntaxTree>(),
+                    references: defaultReferences
+                );
+                byte[] compiledAssembly;
+                using (var output = new MemoryStream())
+                {
+                    EmitResult result = compillation.Emit(output);
+
+                    if (!result.Success)
+                    {
+                        Log.Error($"Module {module} failed to load {result.Diagnostics}");
+                        return false;
+                    }
+                    compiledAssembly = output.ToArray();
+                }
+                AppDomain domain = AsmLoad.Execute(module, compiledAssembly);
+                loadedModules[module] = new ModuleWrap { Domain = domain };
+            }
+            catch(Exception compillationFailed)
+            {
+                Log.Error($"Module {module} failed to load {compillationFailed.Message}", $"{compillationFailed.StackTrace}");
+                return false;
+            }
+            Log.Print($"Module {module} loaded successfully took {(DateTime.Now - start).Milliseconds}ms");
+
+            return true;
+
+        }
+    }
+}

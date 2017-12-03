@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using KotBot.Scripting;
 
 namespace KotBot
 {
@@ -51,22 +50,30 @@ namespace KotBot
             Console.Write("\n");
             if (stream != null) stream.Write("\r\n");
         }
-        [RegisterLuaFunction("debug")]
+
         public static void Debug(params object[] stuff)
         {
             Print(LogType.Debug, stuff);
         }
-        [RegisterLuaFunction("error")]
+
         public static void Error(params object[] stuff)
         {
             Print(LogType.Error, stuff);
         }
-        [RegisterLuaFunction("print")]
+
         public static void Print(params object[] stuff)
         {
-            Print(LogType.Normal, stuff);
+            try
+            {
+                Print(LogType.Normal, stuff);
+            }
+            catch(Exception)
+            {
+
+
+            }
         }
-        [RegisterLuaFunction("warning")]
+
         public static void Warning(params object[] stuff)
         {
             Print(LogType.Warning, stuff);
@@ -82,7 +89,7 @@ namespace KotBot
             }
             string date = String.Format("{0}-{1}-{2}", DateTime.Now.Month, DateTime.Now.Day, DateTime.Now.Year);
             string id = "";
-            for (int I = 0; I <= 100; I++)
+            for (int I = 0; I <= 500; I++)
             {
                 string file = LogFolder + "/" + LogFile + "." + date + "." + I.ToString() + FileExt;
 

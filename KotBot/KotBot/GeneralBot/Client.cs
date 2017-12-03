@@ -4,19 +4,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace KotBot
+namespace KotBot.BotManager
 {
+    [Serializable]
     public class Client
     {
-        public virtual void Message(string message)
+        public virtual object Message(string message)
         {
-
+            return null;
+        }
+        public virtual string ProcessMessage(string message)
+        {
+            return message;
         }
         public virtual string GetIP()
         {
             return "";
         }
         public virtual string GetName()
+        {
+            return "";
+        }
+        public virtual string GetDomain()
         {
             return "";
         }

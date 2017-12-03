@@ -4,23 +4,21 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-
+using KotBot.Modules;
 namespace KotBot
 {
     class Program
     {
         static void Main(string[] args)
         {
-            AppDomain.CurrentDomain.ProcessExit +=CurrentDomain_ProcessExit;
+            AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
             Log.StartLog();
-            Scripting.MainLua.PreLoad();
-            Scripting.MainLua.LoadAll(true);
-            Scripting.LuaHook.Call("StartedUp");
-            while(true)
+
+            Modules.ModuleLoader.LoadAllModules();
+            while (true)
             {
-                Scripting.LuaHook.Call("Think");
-                Thread.Sleep(50);
-                
+
+                //Thread.Sleep(20);
             }
         }
 
