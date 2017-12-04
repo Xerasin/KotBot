@@ -28,6 +28,25 @@ namespace KotBot.DiscordBot
                 dMessage.Wait();
                 return true;
             };
+
+            DiscordManager.DiscordMessage += (DiscordMessageArgs args) =>
+            {
+                string messageContent = args.Message.Content.ToLower();
+                if(!(messageContent.Contains("ping"))) return true;
+                bool found = false;
+                foreach(var user in args.Message.MentionedUsers)
+                {
+                    if(user.Id == args.Client.CurrentUser.Id)
+                    {
+                        found = true;
+                    }
+                }
+                if(!found) return true;
+                Task<Discord.Rest.RestUserMessage> dMessage = args.Channel.SendMessageAsync("pong~ hehe *giggles*");
+                dMessage.Wait();
+                return true;
+            };
+            
         }
     }
 }

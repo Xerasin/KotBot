@@ -14,12 +14,34 @@ namespace KotBot.Modules
         public string Name;
         public string Domain;
         public string Description;
-        public CommandInfo(string Call, string Name, string Domain, string Description)
+        public List<string> Aliases;
+        public CommandInfo(object Call, string Name, string Domain, string Description)
         {
-            this.Call = Call;
+            string newCall = "";
+            List<string> aliases = null;
+            if (typeof(string[]) == Call.GetType())
+            {
+                aliases = new List<string>((string[])Call);
+                newCall = aliases[0];
+                aliases.RemoveAt(0);
+            }
+            else if (typeof(string) == Call.GetType())
+            {
+                newCall = (string)Call;
+            }
+            else
+            {
+                newCall = Call.ToString();
+            }
+            this.Call = newCall;
             this.Name = Name;
             this.Domain = Domain;
             this.Description = Description;
+            if(aliases != null)
+            {
+                this.Aliases = new List<string>(aliases);
+            }
+            
         }
     }
 
@@ -30,6 +52,7 @@ namespace KotBot.Modules
         public string Description { get; set; }
         public string Domain { get; set; } = "Global";
         public string Module { get; set; }
+        public List<string> Aliases { get; set; }
     }
 
     public abstract class ModuleCommand
@@ -51,6 +74,7 @@ namespace KotBot.Modules
         public static string commandStart { get; set; } = "!";
         public static char seperator { get; set; } = ' ';
         public static Dictionary<string, ModuleCommand> commands = new Dictionary<string, ModuleCommand>();
+        public static Dictionary<string, string> aliases = new Dictionary<string, string>();
         public static void Setup()
         {
             ModuleCommunications.MessageReceived += ModuleCommunications_MessageReceived;
@@ -73,6 +97,19 @@ namespace KotBot.Modules
             }
             foreach(string oldCmd in toRemove)
             {
+                if(aliases.ContainsValue(oldCmd))
+                {
+                    List<string> aliasesToRemove = new List<string>();
+                    foreach (var alias in aliases)
+                    {
+                        aliasesToRemove.Add(alias.Key);
+                    }
+
+                    foreach(string alias in aliasesToRemove)
+                    {
+                        aliases.Remove(alias);
+                    }
+                }
                 commands.Remove(oldCmd);
             }
             foreach (var type in assembly.GetTypes())
@@ -92,10 +129,24 @@ namespace KotBot.Modules
                                 Name = cmdInfo.Name,
                                 Description = cmdInfo.Description,
                                 Domain = cmdInfo.Domain,
-                                Module = module     
+                                Aliases = cmdInfo.Aliases,
+                                Module = module
                             };
-
-                            commands.Add(newCmd.Info.Call, (ModuleCommand)instance);
+                            if(!commands.ContainsKey(newCmd.Info.Call))
+                            {
+                                commands.Add(newCmd.Info.Call, (ModuleCommand)instance);
+                                if (newCmd.Info.Aliases != null)
+                                {
+                                    foreach (var alias in newCmd.Info.Aliases)
+                                    {
+                                        if(!aliases.ContainsKey(alias))
+                                        {
+                                            aliases.Add(alias, newCmd.Info.Call);
+                                        }
+                                    }
+                                }
+                            }
+                            
                         }
                     }
                 }
@@ -109,20 +160,32 @@ namespace KotBot.Modules
                 if(words.Count > 0 && words[0].Length > commandStart.Length)
                 {
                     string commandName = words[0].Substring(commandStart.Length);
-                    string restOfText = args.text.Substring(words[0].Length + 1);
+                    string restOfText = "";
+                    if(args.text.Length > words[0].Length + 1)
+                    {
+                        restOfText = args.text.Substring(words[0].Length + 1);
+                    }
                     words.RemoveAt(0);
+                    if(!commands.ContainsKey(commandName))
+                    {
+                        if(aliases.ContainsKey(commandName))
+                        {
+                            commandName = aliases[commandName];
+                        }
+                    }
                     if(commands.ContainsKey(commandName))
                     {
-                        if(commands[commandName].ShouldCall(args.module))
+                        try
                         {
-                            try
+                            if (commands[commandName].ShouldCall(args.module))
                             {
-                                commands[commandName].OnCall(words, args, restOfText);
+                                    commands[commandName].OnCall(words, args, restOfText);
                             }
-                            catch(Exception commandFailure)
-                            {
-                                args.message.Reply($"Command {commandName} failed \"{commandFailure.Message}\" \n {commandFailure.StackTrace}");
-                            }
+                        }
+                        catch(Exception commandFailure)
+                        {
+                            args.message.Reply($"Command {commandName} failed \"{commandFailure.Message}\" \n {commandFailure.StackTrace}");
+                            return false;
                         }
                     }
                 }

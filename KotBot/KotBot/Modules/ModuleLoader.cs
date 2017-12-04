@@ -27,6 +27,7 @@ namespace KotBot.Modules
     public static class ModuleLoader
     {
         public static Dictionary<string, ModuleWrap> loadedModules = new Dictionary<string, ModuleWrap>(); // todo wrap?
+        public static Dictionary<string, bool> loadingModule = new Dictionary<string, bool>();
         public static bool LoadAllModules()
         {
             foreach(var domain in loadedModules)
@@ -114,31 +115,17 @@ namespace KotBot.Modules
 
         public static bool Load(string module)
         {
+            if (loadingModule.ContainsKey(module) && loadingModule[module]) return false;
+            Log.Print($"Loading module {module}");
+
+            loadingModule[module] = true;
             AppDomain testDomain = AppDomain.CurrentDomain;
-            if(loadedModules.ContainsKey(module))
-            {
-                ModuleWrap wrap = loadedModules[module];
-                Assembly assembly = wrap.Assembly;
-                var pluginType = assembly.GetType("Plugin.Plugin");
-                var methods = pluginType.GetMethods();
-                var methodInfo = pluginType.GetMethod("Close", BindingFlags.Static | BindingFlags.Public);
-                var outMain = methodInfo.Invoke(null, null);
-                loadedModules.Remove(module);
-            }
             string[] dirs = Directory.GetDirectories($"csharp/");
             if (!Directory.GetDirectories($"csharp/").Contains<string>($"csharp/{module}"))
                 return false;
             if (!Directory.Exists($"csharp/{module}"))
                 return false;
-            string dllFolder = $"csharp/{module}/";
-            string dllLoc = $"{dllFolder}{module}.dll";
-            if (File.Exists(dllLoc))
-            {
-                
-                if (!DeleteWithWait(dllLoc, 5000))
-                    return false;
-            }
-                
+
             DateTime start = DateTime.Now;
             try
             {
@@ -243,8 +230,19 @@ namespace KotBot.Modules
                 var methodInfo = pluginType.GetMethod("Main", BindingFlags.Static | BindingFlags.Public);
                 var outMain = methodInfo.Invoke(null, new[] { new string[] { module } });
                 ModuleCommands.RegisterAssembliesComamnds(module, assembly);
+
+                if (loadedModules.ContainsKey(module))
+                {
+                    ModuleWrap wrap = loadedModules[module];
+                    Assembly oldAssembly = wrap.Assembly;
+                    var oldPluginType = oldAssembly.GetType("Plugin.Plugin");
+                    var oldMethods = oldPluginType.GetMethods();
+                    var oldMethodInfo = oldPluginType.GetMethod("Close", BindingFlags.Static | BindingFlags.Public);
+                    var oldOutMain = oldMethodInfo.Invoke(null, null);
+                    loadedModules.Remove(module);
+                }
+
                 loadedModules[module] = new ModuleWrap { Domain = null, Assembly = assembly};
-                
             }
             catch(Exception compillationFailed)
             {
@@ -252,6 +250,7 @@ namespace KotBot.Modules
                 return false;
             }
             Log.Print($"Module {module} loaded successfully took {(DateTime.Now - start).Milliseconds}ms");
+            loadingModule[module] = false;
             ModuleCommunications.OnModuleLoaded(module, loadedModules[module]);
             return true;
 

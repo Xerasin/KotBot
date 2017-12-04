@@ -30,7 +30,7 @@ namespace KotBot.DiscordBot
             return tags;
         }
     }
-    [Modules.CommandInfo("db", "danbooru", "Discord", "Danbooru!")]
+    [Modules.CommandInfo(new string[] {"db", "danbooru", "hentai"}, "danbooru", "Discord", "Danbooru!")]
     public class Danbooru : Modules.ModuleCommand
     {
         public override bool OnCall(List<string> args, MessageArgs originalMessage, string completeText)
@@ -61,6 +61,11 @@ namespace KotBot.DiscordBot
                     if (data.GetType() == typeof(JArray))
                     {
                         JArray arrayData = (JArray)data;
+                        if (arrayData.Count == 0)
+                        {
+                            originalMessage.message.Reply($"Failed to find danbooru image for {output}");
+                            return;
+                        }
                         if (arrayData[0] != null && arrayData[0].GetType() == typeof(JObject))
                         {
                             JObject firstImage = (JObject)arrayData[0];
