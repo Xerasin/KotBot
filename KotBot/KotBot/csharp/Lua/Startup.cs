@@ -15,8 +15,17 @@ namespace Plugin
         [ModuleInfo("Lua KotBot", "0.0.5", "Katherine Loveland", "Lua Functionality to KotBot")]
         public static void Main(string[] args)
         {
-            KotBot.Scripting.MainLua.PreLoad();
-            KotBot.Scripting.MainLua.LoadAll(false);
+            try
+            {
+                KotBot.Scripting.MainLua.PreLoad();
+                KotBot.Scripting.MainLua.LoadAll(false);
+            }
+            catch (System.Exception luaFailure)
+            {
+                Log.Error($"Module Lua failed to load {luaFailure.Message}", $"{luaFailure.StackTrace}");
+                throw;
+            }
+            
         }
         public static void Close()
         {

@@ -18,7 +18,13 @@ namespace Plugin
             string token = KotBot.Modules.ModuleConfig.GetString("Discord", "BotToken", "");
             if (!string.IsNullOrWhiteSpace(token))
             {
-                DiscordManager.Start(token);
+                Task<bool> startupCheck = DiscordManager.Start(token);
+                startupCheck.Wait();
+                if(!startupCheck.Result)
+                {
+                    Log.Error("Discord failed to connect!");
+                    return;
+                }
             } 
 
             ModuleCommunications.ModuleLoaded += ModuleCommunications_ModuleLoaded;

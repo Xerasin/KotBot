@@ -8,10 +8,10 @@ namespace KotBot.Modules
 {
     public class ModuleInfo : Attribute
     {
-        public string name;
-        public string version;
-        public string author;
-        public string description;
+        public string name { get; set; }
+        public string version { get; set; }
+        public string author { get; set; }
+        public string description { get; set; }
         public ModuleInfo(string name, string version, string author, string description)
         {
             this.name = name;

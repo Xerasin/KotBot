@@ -30,20 +30,28 @@ namespace KotBot.DiscordBot
     {
         public static event DiscordMessageEvent DiscordMessage;
         public static DWebSocket.DiscordSocketClient client;
-        public async static void Start(string token)
-        {
-            if (client != null)
+        public async static Task<bool> Start(string token)
+        {   
+            try
             {
-                client.Dispose();
+                if (client != null)
+                {
+                    client.Dispose();
+                }
+
+                client = new DWebSocket.DiscordSocketClient();
+
+                client.MessageReceived += Client_MessageReceived;
+                await client.LoginAsync(Discord.TokenType.Bot, token);
+                client.Connected += Client_Connected;
+                await client.StartAsync();
+                return true;
             }
-
-            client = new DWebSocket.DiscordSocketClient();
-
-            client.MessageReceived += Client_MessageReceived;
-            await client.LoginAsync(Discord.TokenType.Bot, token);
-            client.Connected += Client_Connected;
-            await client.StartAsync();
-
+            catch (System.Exception discordFailed)
+            {
+                client = null;
+                return false;
+            }
         }
 
         public async static void Close()

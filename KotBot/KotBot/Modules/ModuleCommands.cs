@@ -59,9 +59,9 @@ namespace KotBot.Modules
     {
         public abstract bool ShouldCall(string source);
         public abstract bool OnCall(List<string> args, MessageArgs originalMessage, string fullText);
-        public virtual bool OnHelp(MessageArgs args)
+        public virtual bool OnHelp(MessageArgs args, string restOfText)
         {
-            args.message.Reply($"No help for command {Info.Name}");
+            args.message.Reply($"No help for command {Info.Name}: {Info.Description}");
             return false;
         }
 
@@ -150,6 +150,69 @@ namespace KotBot.Modules
                         }
                     }
                 }
+            }
+        }
+        public static bool GetHelpForModuleCommand(string commmandOrModule,  MessageArgs args, string restOfText = "")
+        {
+            if (commmandOrModule == null || commmandOrModule.Length == 0)
+            {
+                string output = "";
+                foreach(var module in ModuleLoader.loadedModules)
+                {
+                    output = $"{output}\n{module.Key}";
+                }
+                args.message.Reply($"Loaded Modules:\n {output}");
+                return true;
+            }
+            else if(commmandOrModule[0] != seperator && ModuleLoader.loadedModules.ContainsKey(commmandOrModule))
+            {
+                ModuleWrap moduleWrap = ModuleLoader.loadedModules[commmandOrModule];
+                if(moduleWrap.Info != null)
+                {
+                    string moduleCommands = "";
+                    foreach(var command in commands)
+                    {
+                        if(command.Value.Info.Module == commmandOrModule)
+                        {
+                            moduleCommands = $"{moduleCommands}\n{command.Value.Info.Call}: {command.Value.Info.Description}";
+                        }
+                    }
+                    args.message.Reply($"Help info for {moduleWrap.Info.name}'s commands:\n {moduleCommands}");
+                }
+                else
+                {
+                    args.message.Reply("No info about this module!");
+                }
+                return true;
+            }
+            else
+            {
+                if(commmandOrModule[0] == seperator && commmandOrModule.Length > 1)
+                {
+                    commmandOrModule = commmandOrModule.Substring(1);
+                }
+                if (!commands.ContainsKey(commmandOrModule))
+                {
+                    if (aliases.ContainsKey(commmandOrModule))
+                    {
+                        commmandOrModule = aliases[commmandOrModule];
+                    }
+                }
+                if (commands.ContainsKey(commmandOrModule))
+                {
+                    try
+                    {
+                        ModuleCommand info = commands[commmandOrModule];
+                        info.OnHelp(args, restOfText);
+                        return true;
+                    }
+                    catch (Exception commandFailure)
+                    {
+                        args.message.Reply($"Get Help {commmandOrModule} failed \"{commandFailure.Message}\" \n {commandFailure.StackTrace}");
+                        return false;
+                    }
+                }
+                return false;
             }
         }
         private static bool ModuleCommunications_MessageReceived(MessageArgs args)

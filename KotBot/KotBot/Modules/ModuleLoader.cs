@@ -21,6 +21,7 @@ namespace KotBot.Modules
     {
         public AppDomain Domain {get; set;}
         public Assembly Assembly { get; set; }
+        public ModuleInfo Info { get; set; }
     }
 
 
@@ -241,15 +242,15 @@ namespace KotBot.Modules
                     var oldOutMain = oldMethodInfo.Invoke(null, null);
                     loadedModules.Remove(module);
                 }
-
-                loadedModules[module] = new ModuleWrap { Domain = null, Assembly = assembly};
+                ModuleInfo info = (ModuleInfo)methodInfo.GetCustomAttribute(typeof(ModuleInfo));
+                loadedModules[module] = new ModuleWrap { Domain = null, Assembly = assembly, Info = info };
             }
             catch(Exception compillationFailed)
             {
                 Log.Error($"Module {module} failed to load {compillationFailed.Message}", $"{compillationFailed.StackTrace}");
                 return false;
             }
-            Log.Print($"Module {module} loaded successfully took {(DateTime.Now - start).Milliseconds}ms");
+            Log.Print($"Module {module} loaded successfully took {(DateTime.Now - start).TotalSeconds}s");
             loadingModule[module] = false;
             ModuleCommunications.OnModuleLoaded(module, loadedModules[module]);
             return true;
