@@ -179,7 +179,7 @@ namespace KotBot.Modules
                         {
                             if (commands[commandName].ShouldCall(args.module))
                             {
-                                    commands[commandName].OnCall(words, args, restOfText);
+                                commands[commandName].OnCall(words, args, restOfText);
                             }
                         }
                         catch(Exception commandFailure)

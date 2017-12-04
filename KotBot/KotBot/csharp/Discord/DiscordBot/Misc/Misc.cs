@@ -46,7 +46,19 @@ namespace KotBot.DiscordBot
                 dMessage.Wait();
                 return true;
             };
+            var gameNameTimer = new Timer(60 * 1000);
             
-        }
+            gameNameTimer.Elapsed += new ElapsedEventHandler((object e, ElapsedEventArgs args) => {
+                try
+                {
+
+                }
+                catch (Exception timerFailed)
+                {
+                    Log.Error(timerFailed.Message);
+                }
+            });
+            gameNameTimer.Start();
+    }
     }
 }
