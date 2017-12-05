@@ -13,6 +13,8 @@ namespace KotBot.DiscordBot
     public static class MiscDiscord
     {
         public static Random random = new Random();
+        private static JObject currentGame = null;
+        private static Timer gameNameTimer;
         public static void Init()
         {
             DiscordManager.DiscordMessage += (DiscordMessageArgs args) =>
@@ -50,12 +52,67 @@ namespace KotBot.DiscordBot
                 dMessage.Wait();
                 return true;
             };
-            var gameNameTimer = new Timer(10);
+
+            DiscordManager.DiscordMessage += (DiscordMessageArgs args) =>
+            {
+                try
+                {
+                    if(currentGame == null) return false;
+                    string messageContent = args.Message.Content.ToLower();
+                    if(!(messageContent.Contains("what") && messageContent.Contains("play"))) return true;
+                    bool found = false;
+                    foreach(var user in args.Message.MentionedUsers)
+                    {
+                        if(user.Id == args.Client.CurrentUser.Id)
+                        {
+                            found = true;
+                        }
+                    }
+                    if(!found) return true;
+
+                    JArray platforms = (JArray)currentGame["platforms"];
+                    string strPlatforms = "";
+                    foreach(var platform in platforms)
+                    {
+                        JObject objPlatform = (JObject)platform;
+                        strPlatforms = $"{strPlatforms}{objPlatform["name"].ToString()}, ";
+                    }
+                    if(strPlatforms.Length > 0)
+                    {
+                        strPlatforms = strPlatforms.Substring(0, strPlatforms.Length - 2);
+                    }
+                    string coverImage = "";
+                    if(currentGame["image"] != null)
+                    {
+                        JObject images = (JObject)currentGame["image"];
+                        if(images["original_url"] != null) 
+                        {
+                            string imageURL = images["original_url"].ToString();
+                            if(!imageURL.Contains("gblogo"))
+                            {
+                                coverImage = $"\n**Image:** {imageURL}";
+                            }
+                        }
+                    }   
+                    Task<Discord.Rest.RestUserMessage> dMessage = args.Channel.SendMessageAsync($"**Game Name:** {currentGame["name"].ToString()}\n**Platforms:** {strPlatforms}{coverImage}");
+                    dMessage.Wait();
+                    
+                }
+                catch(Exception whatGameFail)
+                {
+                    Task<Discord.Rest.RestUserMessage> dMessage = args.Channel.SendMessageAsync($"Failure to Get Game {whatGameFail.Message}: \n {whatGameFail.StackTrace}");
+                    dMessage.Wait();
+                }
+                return true;
+            };
+
+            //gameNameTimer.Destroy();
+            gameNameTimer = new Timer(10);
             
             gameNameTimer.Elapsed += new ElapsedEventHandler((object e, ElapsedEventArgs args2) => {
                 try
                 {  
-                    gameNameTimer.Interval = 60 * 1000;
+                    gameNameTimer.Interval = 180 * 1000;
                     SetRandomGameName();
                 }
                 catch (Exception timerFailed)
@@ -65,6 +122,7 @@ namespace KotBot.DiscordBot
             });
             gameNameTimer.Start();
         }
+        
         public static void SetRandomGameName()
         {
             WebClient client = new WebClient();
@@ -104,6 +162,7 @@ namespace KotBot.DiscordBot
                                     {
                                         JObject gameTable = (JObject)gameResults[0];
                                         KotBot.DiscordBot.DiscordManager.SetGameName(gameTable["name"].ToString());
+                                        currentGame = gameTable;
                                     }
                                 }
 

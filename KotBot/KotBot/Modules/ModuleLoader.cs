@@ -123,9 +123,15 @@ namespace KotBot.Modules
             AppDomain testDomain = AppDomain.CurrentDomain;
             string[] dirs = Directory.GetDirectories($"csharp/");
             if (!Directory.GetDirectories($"csharp/").Contains<string>($"csharp/{module}"))
+            {
+                loadingModule[module] = false;
                 return false;
+            }
             if (!Directory.Exists($"csharp/{module}"))
+            {
+                loadingModule[module] = false;
                 return false;
+            }
 
             DateTime start = DateTime.Now;
             try
@@ -217,6 +223,7 @@ namespace KotBot.Modules
                                     Log.Error($"{error.GetMessage()} : {error.Location.ToString()}");
                                 }
                             }
+                            loadingModule[module] = false;
                             return false;
                         }
                         compiledAssembly = output.ToArray();
@@ -248,6 +255,7 @@ namespace KotBot.Modules
             catch(Exception compillationFailed)
             {
                 Log.Error($"Module {module} failed to load {compillationFailed.Message}", $"{compillationFailed.StackTrace}");
+                loadingModule[module] = false;
                 return false;
             }
             Log.Print($"Module {module} loaded successfully took {(DateTime.Now - start).TotalSeconds}s");

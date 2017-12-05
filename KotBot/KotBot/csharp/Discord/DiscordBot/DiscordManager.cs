@@ -64,7 +64,7 @@ namespace KotBot.DiscordBot
 
         private static Task Client_Connected()
         {
-            
+            DiscordMessage = null;
             Log.Print($"Discord Connected, User: {client.CurrentUser.Username}");
             MiscDiscord.Init();
             return null;
