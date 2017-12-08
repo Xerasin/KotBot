@@ -14,6 +14,11 @@ namespace KotBot.Modules.DefaultCommands
         private static bool currentlyRunning = false;
         public override bool OnCall(List<string> args, MessageArgs originalMessage, string fullText)
         {
+            if(originalMessage.message.GetSender().GetUserID() != "|Discord|100102820589490176")
+            {
+                originalMessage.message.Reply("You aren't my maser... go away!!! *pouts*");
+                return false;
+            }
             if (currentlyRunning) return false;
             try
             {

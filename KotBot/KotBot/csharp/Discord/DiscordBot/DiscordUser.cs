@@ -7,6 +7,7 @@ using DWebSocket = Discord.WebSocket;
 using KotBot;
 using KotBot.BotManager;
 using KotBot.Modules;
+using Discord;
 namespace KotBot.DiscordBot
 {
     [Serializable]
@@ -50,15 +51,21 @@ namespace KotBot.DiscordBot
             message = message.Replace("{aname}", this.member.Mention);
             return message;
         }
-        public override object Message(string message)
+        public object Message(string message, Embed embed)
         {
             message = this.ProcessMessage(message);
-            Task<Discord.IDMChannel> channel = member.GetOrCreateDMChannelAsync();
-            channel.Wait();
-            Task<Discord.IUserMessage> dMessage = channel.Result.SendMessageAsync(message);
+            Task<Discord.IDMChannel> tChannel = member.GetOrCreateDMChannelAsync();
+            tChannel.Wait();
+            var channel = (DWebSocket.SocketDMChannel)client.GetChannel(tChannel.Result.Id);
+            Task<Discord.Rest.RestUserMessage> dMessage = channel.SendMessageAsync(message, false, embed);
             dMessage.Wait();
             ModuleCommunications.OnMessageSent("Discord", new Message(new DiscordPMClient(client.CurrentUser, this.member, client), new DiscordUser(client.GetUser(client.CurrentUser.Id), client), message));
             return dMessage.Result;
+        }
+
+        public override object Message(string message)
+        {
+            return Message(message, null);
         }
         public override string GetUserID()
         {

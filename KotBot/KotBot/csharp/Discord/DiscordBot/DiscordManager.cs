@@ -19,7 +19,9 @@ namespace KotBot.DiscordBot
         public DWebSocket.SocketMessage Message { get; set; }
         public DWebSocket.DiscordSocketClient Client { get; set; }
         public DWebSocket.SocketGuildUser User { get; set; }
+        public DWebSocket.SocketUser DMUser { get; set; }
         public DWebSocket.SocketTextChannel Channel { get; set; }
+        public DWebSocket.SocketDMChannel DMChannel { get; set; }
         public Message GenericMessage {get; set; }
     }
     [Serializable]
@@ -86,6 +88,19 @@ namespace KotBot.DiscordBot
 
                 Message chatMessage2 = new Message(new DiscordPMClient(arg.Author, ((DWebSocket.SocketDMChannel)arg.Channel).Recipient, client), new DiscordUser(arg.Author, client), arg.Content);
                 ModuleCommunications.OnMessageReceived("Discord", chatMessage2);
+                if (DiscordMessage != null)
+                {
+                    DiscordMessage(new DiscordMessageArgs()
+                    {
+                        GenericMessage = chatMessage2,
+                        Message = arg,
+                        DMChannel = (DWebSocket.SocketDMChannel)arg.Channel,
+                        DMUser = arg.Author,      
+                        Client = client, 
+                        Channel = null,
+                        User = null
+                    });
+                }
                 return null;
             }
             if (typeof(DWebSocket.SocketTextChannel) == arg.Channel.GetType())
@@ -100,11 +115,13 @@ namespace KotBot.DiscordBot
                     {
                         DiscordMessage(new DiscordMessageArgs()
                         {
+                            GenericMessage = chatMessage,
                             Message = arg,
                             Channel = channel,
-                            Client = client,
                             User = channel.GetUser(arg.Author.Id),
-                            GenericMessage = chatMessage
+                            Client = client,   
+                            DMChannel = null,
+                            DMUser = null
                         });
                     }
                 }  

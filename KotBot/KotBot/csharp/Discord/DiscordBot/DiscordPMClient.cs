@@ -24,13 +24,19 @@ namespace KotBot.DiscordBot
             this.client = client;
         }
 
-        public override object Message(string message)
+        public object Message(string message, Embed embed)
         {
             if (this.client.LoginState != LoginState.LoggedIn) return null;
             if (other == null) return null;
             DiscordUser user = new DiscordUser(other, client);
-            return user.Message(message);
+            return user.Message(message, embed);
         }
+
+        public override object Message(string message)
+        {
+            return Message(message, null);
+        }
+
         public override string GetName()
         {
             return "";

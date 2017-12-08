@@ -13,7 +13,6 @@ namespace KotBot
         {
             AppDomain.CurrentDomain.ProcessExit += CurrentDomain_ProcessExit;
             Log.StartLog();
-
             Modules.ModuleLoader.LoadAllModules();
             while (true)
             {
@@ -21,7 +20,6 @@ namespace KotBot
                 //Thread.Sleep(20);
             }
         }
-
         static void CurrentDomain_ProcessExit(object sender, EventArgs e)
         {
             //Scripting.LuaAIML.Save();

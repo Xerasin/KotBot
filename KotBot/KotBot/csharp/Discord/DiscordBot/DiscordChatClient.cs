@@ -22,15 +22,21 @@ namespace KotBot.DiscordBot
             this.member = user;
             this.client = client;
         }
-        public override object Message(string message)
+        public object Message(string message, Embed embed)
         {
             if (this.client.LoginState != LoginState.LoggedIn) return null;
             message = this.ProcessMessage(message);
-            Task<Discord.Rest.RestUserMessage> dMessage = channel.SendMessageAsync(message);
+            Task<Discord.Rest.RestUserMessage> dMessage = channel.SendMessageAsync(message, false, embed);
             ModuleCommunications.OnMessageSent("Discord", new Message(this, new DiscordUser(client.CurrentUser, client), message));
             dMessage.Wait();
             return dMessage.Result;
         }
+
+        public override object Message(string message)
+        {
+            return Message(message, null);
+        }
+        
         public override string GetName()
         {
             return channel.Guild.Name + "|" + channel.Id;
