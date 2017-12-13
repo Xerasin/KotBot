@@ -230,14 +230,6 @@ namespace KotBot.Modules
                         compiledSymbols = symbols.ToArray();
                     }
                 }
-                
-                var assembly = Assembly.Load(compiledAssembly, compiledSymbols);
-
-                var pluginType = assembly.GetType("Plugin.Plugin");
-                var methods = pluginType.GetMethods();
-                var methodInfo = pluginType.GetMethod("Main", BindingFlags.Static | BindingFlags.Public);
-                var outMain = methodInfo.Invoke(null, new[] { new string[] { module } });
-                ModuleCommands.RegisterAssembliesComamnds(module, assembly);
 
                 if (loadedModules.ContainsKey(module))
                 {
@@ -248,7 +240,16 @@ namespace KotBot.Modules
                     var oldMethodInfo = oldPluginType.GetMethod("Close", BindingFlags.Static | BindingFlags.Public);
                     var oldOutMain = oldMethodInfo.Invoke(null, null);
                     loadedModules.Remove(module);
+                    GC.Collect();
                 }
+
+                var assembly = Assembly.Load(compiledAssembly, compiledSymbols);
+                var pluginType = assembly.GetType("Plugin.Plugin");
+                var methods = pluginType.GetMethods();
+                var methodInfo = pluginType.GetMethod("Main", BindingFlags.Static | BindingFlags.Public);
+                var outMain = methodInfo.Invoke(null, new[] { new string[] { module } });
+                ModuleCommands.RegisterAssembliesComamnds(module, assembly);
+
                 ModuleInfo info = (ModuleInfo)methodInfo.GetCustomAttribute(typeof(ModuleInfo));
                 loadedModules[module] = new ModuleWrap { Domain = null, Assembly = assembly, Info = info };
             }
@@ -261,6 +262,7 @@ namespace KotBot.Modules
             Log.Print($"Module {module} loaded successfully took {(DateTime.Now - start).TotalSeconds}s");
             loadingModule[module] = false;
             ModuleCommunications.OnModuleLoaded(module, loadedModules[module]);
+            GC.Collect();
             return true;
 
         }

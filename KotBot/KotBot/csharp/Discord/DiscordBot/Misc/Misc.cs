@@ -218,8 +218,21 @@ namespace KotBot.DiscordBot
                 dMessage.Wait();
             }
         }
+        public static void Shutdown()
+        {
+            if(gameNameTimer != null)
+            {
+                gameNameTimer.Dispose();
+                gameNameTimer = null;
+                currentGame = null;
+            }
+            GC.Collect();
+        }
         public static void Init()
         {
+            if(gameNameTimer != null)
+                Shutdown();
+            
             AddWordPattern((DiscordMessageArgs args) => {
                 SendMessageGeneric(args, "Hiya! You are looking cute today! hehe *giggles*");
                 return true;
@@ -312,12 +325,10 @@ namespace KotBot.DiscordBot
             };
 
             //gameNameTimer.Destroy();
-            gameNameTimer = new Timer(10);
-            
+            gameNameTimer = new Timer(180 * 1000);
             gameNameTimer.Elapsed += new ElapsedEventHandler((object e, ElapsedEventArgs args2) => {
                 try
                 {  
-                    gameNameTimer.Interval = 180 * 1000;
                     SetRandomGameName();
                 }
                 catch (Exception timerFailed)
@@ -325,6 +336,7 @@ namespace KotBot.DiscordBot
                     Log.Error(timerFailed.Message);
                 }
             });
+            SetRandomGameName();
             gameNameTimer.Start();
         }
         

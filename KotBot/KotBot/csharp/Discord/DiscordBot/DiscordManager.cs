@@ -40,9 +40,8 @@ namespace KotBot.DiscordBot
                 {
                     client.Dispose();
                 }
-
                 client = new DWebSocket.DiscordSocketClient();
-
+                
                 client.MessageReceived += Client_MessageReceived;
                 await client.LoginAsync(Discord.TokenType.Bot, token);
                 client.Connected += Client_Connected;
@@ -62,10 +61,12 @@ namespace KotBot.DiscordBot
             {
                 await client.LogoutAsync();
             }
+            MiscDiscord.Shutdown();
         }
 
         private static Task Client_Connected()
         {
+            MiscDiscord.Shutdown();
             DiscordMessage = null;
             Log.Print($"Discord Connected, User: {client.CurrentUser.Username}");
             MiscDiscord.Init();
